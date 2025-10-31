@@ -1,5 +1,7 @@
 # Диаграмма вариантов использования — CryptoTax Helper
 
+![Use Case](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Documentation/Diagrams/Images/use_case.png)
+
 ---
 
 ## 🧩 Глоссарий
