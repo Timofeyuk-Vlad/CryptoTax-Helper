@@ -12,7 +12,7 @@
 
 [📄 SRS документ (Спецификация требований)](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Documentation/Requirements/SRS.md) 
 
-[🎨 Мокапы пользовательского интерфейса](./docs/mockups)
+[🎨 Мокапы пользовательского интерфейса](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Mockups)
 
 [📊 UML диаграммы](./docs/diagrams)
 
