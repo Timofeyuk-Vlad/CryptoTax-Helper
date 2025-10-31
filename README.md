@@ -10,13 +10,17 @@
 
 ## 🔗 Документация проекта
 
-[📄 SRS документ (Спецификация требований)](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Documentation/Requirements/SRS.md) 
+[SRS документ (Спецификация требований)](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Documentation/Requirements/SRS.md) 
 
-[🎨 Мокапы пользовательского интерфейса](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Mockups)
+[Мокапы пользовательского интерфейса](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Mockups)
 
-[📊 UML диаграммы](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Diagrams/Images)
+[UML диаграммы](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Diagrams/Images)
 
-[💻 Исходный код]([./code](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Code)) 
+[Исходный код]([./code](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Code)) 
+
+[Test plan](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Test%20plan.md) 
+
+[Test results](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/blob/main/Test%20results.md) 
 
 ## 🌍 Поддерживаемые юрисдикции
 
