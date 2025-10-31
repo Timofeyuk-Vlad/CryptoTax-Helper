@@ -14,9 +14,9 @@
 
 [🎨 Мокапы пользовательского интерфейса](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Mockups)
 
-[📊 UML диаграммы](./docs/diagrams)
+[📊 UML диаграммы](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Documentation/Diagrams/Images)
 
-[💻 Исходный код](./code) 
+[💻 Исходный код]([./code](https://github.com/Timofeyuk-Vlad/CryptoTax-Helper/tree/main/Code)) 
 
 ## 🌍 Поддерживаемые юрисдикции
 
