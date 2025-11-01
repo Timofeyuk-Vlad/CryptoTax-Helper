@@ -8,182 +8,256 @@ import com.cryptotax.helper.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class BinanceService {
 
-    private final WebClient webClient;
+    private final CoinGeckoService coinGeckoService;
 
+    /**
+     * Основной метод импорта - теперь работает в демо-режиме с реальными ценами
+     */
     public List<Transaction> importTrades(ExchangeConnection connection, User user) {
         try {
-            log.info("Начинаем импорт транзакций с Binance для пользователя {}", user.getEmail());
+            log.info("Демо-импорт транзакций с реальными ценами для пользователя {}", user.getEmail());
 
-            String apiKey = connection.getApiKey();
-            String apiSecret = connection.getApiSecret();
+            // В демо-режиме игнорируем реальные API ключи и создаем реалистичные данные
+            List<Transaction> transactions = createRealisticDemoTransactions(user, connection);
 
-            // Получаем историю торгов
-            List<BinanceTradeDto> binanceTrades = getTradeHistory(apiKey, apiSecret);
-
-            // Конвертируем в наши транзакции
-            List<Transaction> transactions = convertToTransactions(binanceTrades, user, connection);
-
-            log.info("Успешно импортировано {} транзакций с Binance", transactions.size());
+            log.info("Успешно создано {} демо-транзакций с реальными ценами", transactions.size());
             return transactions;
 
         } catch (Exception e) {
-            log.error("Ошибка при импорте транзакций с Binance: {}", e.getMessage(), e);
-            throw new RuntimeException("Ошибка импорта с Binance: " + e.getMessage(), e);
+            log.error("Ошибка при демо-импорте транзакций: {}", e.getMessage(), e);
+            throw new RuntimeException("Ошибка демо-импорта: " + e.getMessage(), e);
         }
     }
 
-    private List<BinanceTradeDto> getTradeHistory(String apiKey, String apiSecret) {
-        try {
-            long timestamp = System.currentTimeMillis();
-            String signature = generateSignature("timestamp=" + timestamp, apiSecret);
+    /**
+     * Валидация API ключей - в демо-режиме всегда возвращает true для любых ключей
+     */
+    public boolean validateApiKeys(String apiKey, String apiSecret) {
+        log.info("Демо-режим: валидация API ключей Binance");
 
-            // В реальном приложении здесь будет вызов Binance API
-            // Сейчас возвращаем демо-данные
-            log.info("Имитация вызова Binance API с ключом: {} и сигнатурой: {}", apiKey, signature);
-
-            return generateDemoBinanceTrades();
-
-        } catch (Exception e) {
-            log.error("Ошибка при получении истории торгов с Binance: {}", e.getMessage());
-            throw new RuntimeException("Ошибка получения данных с Binance", e);
+        // ✅ В ДЕМО-РЕЖИМЕ ПРИНИМАЕМ ЛЮБЫЕ КЛЮЧИ КРОМЕ ПУСТЫХ
+        if (apiKey == null || apiKey.trim().isEmpty() || apiSecret == null || apiSecret.trim().isEmpty()) {
+            log.warn("Пустые API ключи в демо-режиме");
+            return false;
         }
+
+        // ✅ ПРИНИМАЕМ ЛЮБЫЕ НЕПУСТЫЕ КЛЮЧИ ДАЖЕ КОРОТКИЕ
+        log.info("Демо-режим: успешная валидация для ключа: {}...",
+                apiKey.length() > 10 ? apiKey.substring(0, 10) + "..." : apiKey);
+        return true;
     }
 
-    private List<BinanceTradeDto> generateDemoBinanceTrades() {
-        List<BinanceTradeDto> trades = new ArrayList<>();
-        long baseTime = System.currentTimeMillis();
-
-        // Демо данные - покупка BTC
-        BinanceTradeDto buyBtc = new BinanceTradeDto();
-        buyBtc.setTradeId(1L);
-        buyBtc.setSymbol("BTCUSDT");
-        buyBtc.setPrice("45000.00");
-        buyBtc.setQuantity("0.1");
-        buyBtc.setQuoteQuantity("4500.00");
-        buyBtc.setCommission("4.50");
-        buyBtc.setCommissionAsset("USDT");
-        buyBtc.setTimestamp(baseTime - 86400000L * 30); // 30 дней назад
-        buyBtc.setIsBuyer(true);
-        trades.add(buyBtc);
-
-        // Продажа BTC
-        BinanceTradeDto sellBtc = new BinanceTradeDto();
-        sellBtc.setTradeId(2L);
-        sellBtc.setSymbol("BTCUSDT");
-        sellBtc.setPrice("52000.00");
-        sellBtc.setQuantity("0.05");
-        sellBtc.setQuoteQuantity("2600.00");
-        sellBtc.setCommission("2.60");
-        sellBtc.setCommissionAsset("USDT");
-        sellBtc.setTimestamp(baseTime - 86400000L * 15); // 15 дней назад
-        sellBtc.setIsBuyer(false);
-        trades.add(sellBtc);
-
-        // Покупка ETH
-        BinanceTradeDto buyEth = new BinanceTradeDto();
-        buyEth.setTradeId(3L);
-        buyEth.setSymbol("ETHUSDT");
-        buyEth.setPrice("3200.00");
-        buyEth.setQuantity("2.0");
-        buyEth.setQuoteQuantity("6400.00");
-        buyEth.setCommission("6.40");
-        buyEth.setCommissionAsset("USDT");
-        buyEth.setTimestamp(baseTime - 86400000L * 10); // 10 дней назад
-        buyEth.setIsBuyer(true);
-        trades.add(buyEth);
-
-        return trades;
-    }
-
-    private List<Transaction> convertToTransactions(List<BinanceTradeDto> binanceTrades, User user, ExchangeConnection connection) {
+    /**
+     * Создание реалистичных демо-транзакций с реальными ценами
+     */
+    private List<Transaction> createRealisticDemoTransactions(User user, ExchangeConnection connection) {
         List<Transaction> transactions = new ArrayList<>();
+        Random random = new Random();
 
-        for (BinanceTradeDto binanceTrade : binanceTrades) {
-            Transaction transaction = new Transaction();
-            transaction.setUser(user);
-            transaction.setExchangeConnection(connection);
-            transaction.setExchangeTxId("BINANCE_" + binanceTrade.getTradeId());
+        // Получаем текущие реальные цены
+        Map<String, BigDecimal> currentPrices = getCurrentRealPrices();
 
-            // Определяем тип транзакции
-            if (binanceTrade.getIsBuyer()) {
-                transaction.setType(TransactionType.BUY);
-            } else {
-                transaction.setType(TransactionType.SELL);
-            }
+        // Создаем историю транзакций за последние 6 месяцев
+        LocalDateTime now = LocalDateTime.now();
 
-            // Парсим символ (например, "BTCUSDT" -> base="BTC", quote="USDT")
-            String symbol = binanceTrade.getSymbol();
-            if (symbol.endsWith("USDT")) {
-                transaction.setBaseAsset(symbol.substring(0, symbol.length() - 4));
-                transaction.setQuoteAsset("USDT");
-            } else {
-                transaction.setBaseAsset(symbol.substring(0, 3));
-                transaction.setQuoteAsset(symbol.substring(3));
-            }
+        // 1. Покупка BTC 6 месяцев назад
+        transactions.add(createHistoricalTransaction(
+                user, connection, "BTC", new BigDecimal("0.5"), TransactionType.BUY,
+                now.minusMonths(6), currentPrices.get("BTC").multiply(new BigDecimal("0.7")), // Цена 6 месяцев назад
+                random
+        ));
 
-            transaction.setAmount(new BigDecimal(binanceTrade.getQuantity()));
-            transaction.setPrice(new BigDecimal(binanceTrade.getPrice()));
-            transaction.setTotal(new BigDecimal(binanceTrade.getQuoteQuantity()));
-            transaction.setFee(new BigDecimal(binanceTrade.getCommission()));
-            transaction.setFeeAsset(binanceTrade.getCommissionAsset());
+        // 2. Покупка ETH 4 месяца назад
+        transactions.add(createHistoricalTransaction(
+                user, connection, "ETH", new BigDecimal("3.0"), TransactionType.BUY,
+                now.minusMonths(4), currentPrices.get("ETH").multiply(new BigDecimal("0.8")),
+                random
+        ));
 
-            // Конвертируем timestamp в LocalDateTime
-            LocalDateTime tradeTime = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(binanceTrade.getTimestamp()),
-                    ZoneId.systemDefault()
-            );
-            transaction.setTimestamp(tradeTime);
-            transaction.setImportedAt(LocalDateTime.now());
-            transaction.setIsProcessed(true);
+        // 3. Покупка ADA 3 месяца назад
+        transactions.add(createHistoricalTransaction(
+                user, connection, "ADA", new BigDecimal("500"), TransactionType.BUY,
+                now.minusMonths(3), currentPrices.get("ADA").multiply(new BigDecimal("0.85")),
+                random
+        ));
 
-            transactions.add(transaction);
-        }
+        // 4. Продажа части BTC 2 месяца назад
+        transactions.add(createHistoricalTransaction(
+                user, connection, "BTC", new BigDecimal("0.1"), TransactionType.SELL,
+                now.minusMonths(2), currentPrices.get("BTC").multiply(new BigDecimal("1.2")),
+                random
+        ));
+
+        // 5. Покупка SOL 1 месяц назад
+        transactions.add(createHistoricalTransaction(
+                user, connection, "SOL", new BigDecimal("10"), TransactionType.BUY,
+                now.minusMonths(1), currentPrices.get("SOL").multiply(new BigDecimal("0.9")),
+                random
+        ));
+
+        // 6. Стейкинг награда ADA
+        transactions.add(createStakingTransaction(
+                user, connection, "ADA", new BigDecimal("25"),
+                now.minusDays(15), currentPrices.get("ADA")
+        ));
+
+        // 7. Недавняя покупка DOT
+        transactions.add(createHistoricalTransaction(
+                user, connection, "DOT", new BigDecimal("50"), TransactionType.BUY,
+                now.minusDays(7), currentPrices.get("DOT").multiply(new BigDecimal("0.95")),
+                random
+        ));
+
+        // Сортируем по времени (старые сначала)
+        transactions.sort(Comparator.comparing(Transaction::getTimestamp));
 
         return transactions;
     }
 
-    private String generateSignature(String data, String apiSecret) {
-        try {
-            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-            SecretKeySpec secret_key = new SecretKeySpec(apiSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            sha256_HMAC.init(secret_key);
+    /**
+     * Создание исторической транзакции с реалистичными данными
+     */
+    private Transaction createHistoricalTransaction(User user, ExchangeConnection connection,
+                                                    String asset, BigDecimal amount, TransactionType type,
+                                                    LocalDateTime timestamp, BigDecimal historicalPrice,
+                                                    Random random) {
+        Transaction transaction = new Transaction();
+        transaction.setUser(user);
+        transaction.setExchangeConnection(connection);
+        transaction.setBaseAsset(asset);
+        transaction.setQuoteAsset("USDT");
+        transaction.setType(type);
+        transaction.setAmount(amount);
+        transaction.setTimestamp(timestamp);
+        transaction.setImportedAt(LocalDateTime.now());
+        transaction.setIsProcessed(true);
 
-            byte[] hash = sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hash);
+        // Генерируем реалистичный ID транзакции
+        transaction.setExchangeTxId("BINANCE_DEMO_" + System.currentTimeMillis() + "_" +
+                asset + "_" + type.name() + "_" + random.nextInt(10000));
 
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка генерации подписи", e);
-        }
+        // Используем историческую цену с небольшими случайными отклонениями для реалистичности
+        BigDecimal priceVariation = historicalPrice.multiply(
+                BigDecimal.valueOf(0.95 + random.nextDouble() * 0.1) // ±5% вариация
+        ).setScale(2, RoundingMode.HALF_UP);
+
+        transaction.setPrice(priceVariation);
+
+        // Рассчитываем общую сумму
+        BigDecimal total = priceVariation.multiply(amount).setScale(2, RoundingMode.HALF_UP);
+        transaction.setTotal(total);
+
+        // Добавляем комиссию (0.1% от суммы)
+        BigDecimal fee = total.multiply(new BigDecimal("0.001")).setScale(6, RoundingMode.HALF_UP);
+        transaction.setFee(fee);
+        transaction.setFeeAsset(asset.equals("BTC") ? "BTC" : "BNB");
+
+        log.debug("Создана демо-транзакция: {} {} {} по цене {}",
+                type.getDisplayName(), amount, asset, priceVariation);
+
+        return transaction;
     }
 
-    public boolean validateApiKeys(String apiKey, String apiSecret) {
+    /**
+     * Создание транзакции стейкинга
+     */
+    private Transaction createStakingTransaction(User user, ExchangeConnection connection,
+                                                 String asset, BigDecimal rewardAmount,
+                                                 LocalDateTime timestamp, BigDecimal currentPrice) {
+        Transaction transaction = new Transaction();
+        transaction.setUser(user);
+        transaction.setExchangeConnection(connection);
+        transaction.setBaseAsset(asset);
+        transaction.setType(TransactionType.STAKING);
+        transaction.setAmount(rewardAmount);
+        transaction.setTimestamp(timestamp);
+        transaction.setImportedAt(LocalDateTime.now());
+        transaction.setIsProcessed(true);
+        transaction.setExchangeTxId("BINANCE_STAKING_" + System.currentTimeMillis() + "_" + asset);
+
+        // Для стейкинга цена и общая сумма не обязательны, но можем установить для расчетов
+        transaction.setPrice(currentPrice);
+        transaction.setTotal(currentPrice.multiply(rewardAmount).setScale(2, RoundingMode.HALF_UP));
+
+        log.debug("Создана демо-транзакция стейкинга: {} {}", rewardAmount, asset);
+
+        return transaction;
+    }
+
+    /**
+     * Получение текущих реальных цен через CoinGecko
+     */
+    private Map<String, BigDecimal> getCurrentRealPrices() {
+        Map<String, BigDecimal> prices = new HashMap<>();
+
         try {
-            // Простая проверка - в реальном приложении делаем тестовый запрос
-            log.info("Валидация API ключей Binance...");
-            return apiKey != null && !apiKey.trim().isEmpty() &&
-                    apiSecret != null && !apiSecret.trim().isEmpty();
+            prices.put("BTC", coinGeckoService.getCurrentPrice("bitcoin", "usd"));
+            prices.put("ETH", coinGeckoService.getCurrentPrice("ethereum", "usd"));
+            prices.put("ADA", coinGeckoService.getCurrentPrice("cardano", "usd"));
+            prices.put("SOL", coinGeckoService.getCurrentPrice("solana", "usd"));
+            prices.put("DOT", coinGeckoService.getCurrentPrice("polkadot", "usd"));
+            prices.put("BNB", coinGeckoService.getCurrentPrice("binancecoin", "usd"));
+
+            log.info("Получены реальные цены: BTC=${}, ETH=${}, ADA=${}",
+                    prices.get("BTC"), prices.get("ETH"), prices.get("ADA"));
 
         } catch (Exception e) {
-            log.error("Ошибка валидации API ключей Binance: {}", e.getMessage());
-            return false;
+            log.warn("Не удалось получить реальные цены, используем демо-значения: {}", e.getMessage());
+
+            // Демо-значения если CoinGecko недоступен
+            prices.put("BTC", new BigDecimal("45000.00"));
+            prices.put("ETH", new BigDecimal("3200.00"));
+            prices.put("ADA", new BigDecimal("0.45"));
+            prices.put("SOL", new BigDecimal("95.00"));
+            prices.put("DOT", new BigDecimal("6.50"));
+            prices.put("BNB", new BigDecimal("350.00"));
+        }
+
+        return prices;
+    }
+
+    /**
+     * Метод для импорта по конкретному символу (демо-версия)
+     */
+    public List<BinanceTradeDto> getTradeHistoryBySymbol(String apiKey, String apiSecret, String symbol) {
+        log.info("Демо-режим: запрос истории по символу {}", symbol);
+
+        // В демо-режиме возвращаем пустой список
+        // В реальной реализации здесь был бы вызов Binance API
+        return new ArrayList<>();
+    }
+
+    /**
+     * Дополнительный метод для создания демо-транзакций с реальными ценами
+     */
+    public List<Transaction> importDemoWithRealPrices(User user) {
+        try {
+            log.info("Создание демо-транзакций с реальными ценами для пользователя {}", user.getEmail());
+
+            // Создаем временное подключение для демо
+            ExchangeConnection demoConnection = new ExchangeConnection();
+            demoConnection.setId(999L); // Демо ID
+            demoConnection.setExchange(com.cryptotax.helper.entity.Exchange.BINANCE);
+
+            List<Transaction> transactions = createRealisticDemoTransactions(user, demoConnection);
+
+            log.info("Создано {} демо-транзакций с реальными ценами", transactions.size());
+            return transactions;
+
+        } catch (Exception e) {
+            log.error("Ошибка создания демо-транзакций: {}", e.getMessage());
+            throw new RuntimeException("Ошибка создания демо-данных: " + e.getMessage());
         }
     }
 }

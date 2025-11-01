@@ -54,22 +54,25 @@ public class DashboardService {
         return userInfo;
     }
 
+    // В методе getPortfolioSummary добавляем демо-данные:
     private Map<String, Object> getPortfolioSummary(Long userId) {
         Map<String, Object> portfolio = new HashMap<>();
 
-        // Временные демо-данные (в реальном приложении будем считать из транзакций)
+        // Демо-данные портфеля
         portfolio.put("totalPortfolioValue", new BigDecimal("15420.75"));
         portfolio.put("totalInvested", new BigDecimal("12000.00"));
         portfolio.put("totalProfit", new BigDecimal("3420.75"));
         portfolio.put("profitPercentage", new BigDecimal("28.5"));
         portfolio.put("transactionCount", transactionImportService.getUserTransactionCount(userId));
         portfolio.put("connectedExchanges", 2);
+        portfolio.put("demoMode", true); // ✅ ДОБАВЛЯЕМ ФЛАГ ДЕМО-РЕЖИМА
 
         // Демо-активы
         Map<String, Object> assets = new HashMap<>();
-        assets.put("BTC", new BigDecimal("0.85"));
-        assets.put("ETH", new BigDecimal("5.2"));
-        assets.put("USDT", new BigDecimal("1250.00"));
+        assets.put("BTC", Map.of("amount", new BigDecimal("0.4"), "value", new BigDecimal("18000.00")));
+        assets.put("ETH", Map.of("amount", new BigDecimal("3.0"), "value", new BigDecimal("9600.00")));
+        assets.put("ADA", Map.of("amount", new BigDecimal("525"), "value", new BigDecimal("236.25")));
+        assets.put("USDT", Map.of("amount", new BigDecimal("1250.00"), "value", new BigDecimal("1250.00")));
         portfolio.put("assets", assets);
 
         return portfolio;

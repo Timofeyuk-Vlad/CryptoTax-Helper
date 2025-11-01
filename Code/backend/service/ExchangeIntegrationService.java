@@ -21,8 +21,12 @@ public class ExchangeIntegrationService {
     private final TransactionRepository transactionRepository;
     private final ExchangeConnectionService exchangeConnectionService;
     private final NotificationService notificationService;
+    private final SubscriptionService subscriptionService;
 
     public List<Transaction> importFromExchange(Long connectionId, User user) {
+        // ✅ В ДЕМО-РЕЖИМЕ ПРОПУСКАЕМ ПРОВЕРКУ ЛИМИТОВ
+        // subscriptionService.checkTransactionImportLimit(user.getId());
+
         ExchangeConnection connection = exchangeConnectionService.getConnectionById(connectionId);
 
         if (!connection.getUser().getId().equals(user.getId())) {
@@ -32,6 +36,8 @@ public class ExchangeIntegrationService {
         List<Transaction> transactions;
 
         try {
+            log.info("Демо-режим: импорт с биржи {}", connection.getExchange());
+
             switch (connection.getExchange()) {
                 case BINANCE:
                     transactions = binanceService.importTrades(connection, user);
@@ -40,7 +46,10 @@ public class ExchangeIntegrationService {
                 case OKX:
                 case HUOBI:
                 case KUCOIN:
-                    throw new RuntimeException("Интеграция с " + connection.getExchange().getDisplayName() + " пока не реализована");
+                    // ✅ В ДЕМО-РЕЖИМЕ ВСЕ БИРЖИ РАБОТАЮТ КАК BINANCE
+                    log.info("Демо-режим: использование Binance для {}", connection.getExchange());
+                    transactions = binanceService.importTrades(connection, user);
+                    break;
                 default:
                     throw new RuntimeException("Неподдерживаемая биржа: " + connection.getExchange());
             }
@@ -54,7 +63,7 @@ public class ExchangeIntegrationService {
             // Отправляем уведомление об успешном импорте
             notificationService.notifyImportSuccess(user.getId(), savedTransactions.size(), connection.getExchange().getDisplayName());
 
-            log.info("Успешно импортировано {} транзакций с {}", savedTransactions.size(), connection.getExchange());
+            log.info("Демо-режим: успешно импортировано {} транзакций с {}", savedTransactions.size(), connection.getExchange());
             return savedTransactions;
 
         } catch (Exception e) {
@@ -65,6 +74,9 @@ public class ExchangeIntegrationService {
     }
 
     public boolean validateExchangeConnection(Exchange exchange, String apiKey, String apiSecret) {
+        log.info("Демо-режим: валидация подключения к {}", exchange);
+
+        // ✅ В ДЕМО-РЕЖИМЕ ВСЕ БИРЖИ ВАЛИДИРУЮТСЯ ЧЕРЕЗ BINANCE SERVICE
         switch (exchange) {
             case BINANCE:
                 return binanceService.validateApiKeys(apiKey, apiSecret);
@@ -72,11 +84,25 @@ public class ExchangeIntegrationService {
             case OKX:
             case HUOBI:
             case KUCOIN:
-                // TODO: Реализовать валидацию для других бирж
-                log.warn("Валидация для {} пока не реализована, возвращаем true", exchange);
-                return true;
+                // ✅ В ДЕМО-РЕЖИМЕ ВСЕ БИРЖИ РАБОТАЮТ
+                log.info("Демо-режим: успешная валидация для {}", exchange);
+                return binanceService.validateApiKeys(apiKey, apiSecret);
             default:
                 throw new RuntimeException("Неподдерживаемая биржа: " + exchange);
+        }
+    }
+
+    /**
+     * Демо-метод для быстрого создания тестовых данных
+     */
+    public List<Transaction> createDemoTransactions(User user) {
+        try {
+            log.info("Создание демо-транзакций для пользователя {}", user.getEmail());
+            return binanceService.importDemoWithRealPrices(user);
+
+        } catch (Exception e) {
+            log.error("Ошибка создания демо-транзакций: {}", e.getMessage());
+            throw new RuntimeException("Ошибка создания демо-данных: " + e.getMessage());
         }
     }
 }

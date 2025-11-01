@@ -16,8 +16,12 @@ public class ReportService {
 
     private final UserRepository userRepository;
     private final TaxCalculationService taxCalculationService;
+    private final SubscriptionService subscriptionService;
 
     public Map<String, Object> generateTaxReport(Long userId, int year) {
+        // ✅ Проверяем доступ к генерации отчетов
+        subscriptionService.checkTaxReportGeneration(userId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 

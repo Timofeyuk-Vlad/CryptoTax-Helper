@@ -1,5 +1,6 @@
 package com.cryptotax.helper.controller;
 
+import com.cryptotax.helper.service.ExcelReportService;
 import com.cryptotax.helper.service.PdfReportService;
 import com.cryptotax.helper.service.ReportService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ReportController {
 
     private final ReportService reportService;
     private final PdfReportService pdfReportService;
+    private final ExcelReportService excelReportService;
 
     @PostMapping("/tax")
     public ResponseEntity<?> generateTaxReport(@RequestParam(defaultValue = "2024") int year) {
@@ -54,31 +56,33 @@ public class ReportController {
                     .body(pdfBytes);
 
         } catch (Exception e) {
-            // Для PDF возвращаем ошибку в виде простого текста
             return ResponseEntity.badRequest()
                     .body(("Ошибка при генерации PDF: " + e.getMessage()).getBytes());
         }
     }
 
-    @PostMapping("/tax/pdf-html")
-    public ResponseEntity<byte[]> generateTaxReportPdfHtml(@RequestParam(defaultValue = "2024") int year) {
+    @PostMapping("/tax/excel")
+    public ResponseEntity<byte[]> generateTaxReportExcel(@RequestParam(defaultValue = "2024") int year) {
         try {
             Long userId = 1L; // Временная заглушка
 
-            byte[] pdfBytes = pdfReportService.generateHtmlTaxReportPdf(userId, year);
+            byte[] excelBytes = excelReportService.generateTaxReportExcel(userId, year);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("filename",
-                    "tax-report-html-" + year + ".pdf");
+                    "tax-report-" + year + ".xlsx");
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(pdfBytes);
+                    .body(excelBytes);
 
         } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ошибка при генерации Excel отчета: " + e.getMessage());
             return ResponseEntity.badRequest()
-                    .body(("Ошибка при генерации HTML PDF: " + e.getMessage()).getBytes());
+                    .body(("Ошибка при генерации Excel: " + e.getMessage()).getBytes());
         }
     }
 
@@ -88,8 +92,7 @@ public class ReportController {
         formats.put("availableFormats", java.util.List.of(
                 Map.of("format", "JSON", "description", "Машиночитаемый формат для API", "endpoint", "/api/reports/tax"),
                 Map.of("format", "PDF", "description", "PDF документ для печати", "available", true, "endpoint", "/api/reports/tax/pdf"),
-                Map.of("format", "PDF_HTML", "description", "PDF с HTML разметкой", "available", true, "endpoint", "/api/reports/tax/pdf-html"),
-                Map.of("format", "EXCEL", "description", "Excel файл с детализацией", "available", false)
+                Map.of("format", "EXCEL", "description", "Excel файл с детализацией операций", "available", true, "endpoint", "/api/reports/tax/excel")
         ));
 
         return ResponseEntity.ok(formats);

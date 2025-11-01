@@ -1,6 +1,7 @@
 package com.cryptotax.helper.service;
 
 import com.cryptotax.helper.dto.UserRegistrationDto;
+import com.cryptotax.helper.entity.SubscriptionPlan;
 import com.cryptotax.helper.entity.User;
 import com.cryptotax.helper.entity.UserRole;
 import com.cryptotax.helper.repository.UserRepository;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -16,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SubscriptionService subscriptionService;
 
     public User registerUser(UserRegistrationDto registrationDto) {
         if (userRepository.existsByEmail(registrationDto.getEmail())) {
@@ -33,8 +36,12 @@ public class UserService {
         user.setLastName(registrationDto.getLastName());
         user.setIsEnabled(true);
 
-        // ✅ Добавляем роль пользователя по умолчанию
+        // ✅ Назначаем роль пользователя по умолчанию
         user.addRole(UserRole.ROLE_USER);
+
+        // ✅ Устанавливаем бесплатный тариф по умолчанию
+        user.setSubscriptionType(SubscriptionPlan.FREE.name());
+        subscriptionService.applySubscriptionLimits(user, SubscriptionPlan.FREE);
 
         return userRepository.save(user);
     }
@@ -48,7 +55,7 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    // ✅ Новые методы для управления ролями
+    // ✅ Методы для управления ролями
     public User addRoleToUser(Long userId, UserRole role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -77,28 +84,18 @@ public class UserService {
     public User updateUserSubscription(Long userId, String subscriptionType, Integer months) {
         User user = getUserById(userId);
 
-        user.setSubscriptionType(subscriptionType);
+        SubscriptionPlan plan = SubscriptionPlan.fromString(subscriptionType);
+        user.setSubscriptionType(plan.name());
+
         if (months != null && months > 0) {
-            user.setSubscriptionExpires(java.time.LocalDateTime.now().plusMonths(months));
+            user.setSubscriptionExpires(LocalDateTime.now().plusMonths(months));
+        } else {
+            // Для бесплатного тарифа или если months не указан
+            user.setSubscriptionExpires(null);
         }
 
-        // Обновляем лимиты в зависимости от подписки
-        switch (subscriptionType.toUpperCase()) {
-            case "PREMIUM":
-                user.setMaxExchangeConnections(10);
-                user.setMaxTransactionsPerYear(10000);
-                user.addRole(UserRole.ROLE_PREMIUM);
-                break;
-            case "PRO":
-                user.setMaxExchangeConnections(Integer.MAX_VALUE);
-                user.setMaxTransactionsPerYear(Integer.MAX_VALUE);
-                user.addRole(UserRole.ROLE_PREMIUM);
-                break;
-            default:
-                user.setMaxExchangeConnections(3);
-                user.setMaxTransactionsPerYear(1000);
-                user.removeRole(UserRole.ROLE_PREMIUM);
-        }
+        // Применяем лимиты подписки
+        subscriptionService.applySubscriptionLimits(user, plan);
 
         return userRepository.save(user);
     }

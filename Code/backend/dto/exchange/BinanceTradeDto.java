@@ -39,4 +39,7 @@ public class BinanceTradeDto {
 
     @JsonProperty("isMaker")
     private Boolean isMaker;
+
+    @JsonProperty("isBestMatch")
+    private Boolean isBestMatch;
 }

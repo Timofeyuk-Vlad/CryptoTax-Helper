@@ -9,6 +9,9 @@ public class ExternalApiConfig {
 
     @Bean
     public WebClient webClient() {
-        return WebClient.builder().build();
+        return WebClient.builder()
+                .baseUrl("https://api.binance.com")
+                .defaultHeader("Content-Type", "application/x-www-form-urlencoded")
+                .build();
     }
 }

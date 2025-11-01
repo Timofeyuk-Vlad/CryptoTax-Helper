@@ -20,6 +20,7 @@ public class ExchangeConnectionService {
 
     private final ExchangeConnectionRepository exchangeConnectionRepository;
     private final UserRepository userRepository;
+    private final SubscriptionService subscriptionService;
 
     // В реальном приложении используйте безопасное хранение ключей!
     private final String encryptionPassword = "temp-encryption-key";
@@ -28,6 +29,9 @@ public class ExchangeConnectionService {
     public ExchangeConnection createConnection(Long userId, ExchangeConnectionDto connectionDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        // ✅ Проверяем лимит подключений
+        subscriptionService.checkExchangeConnectionLimit(userId);
 
         if (exchangeConnectionRepository.existsByUserAndExchange(user, connectionDto.getExchange())) {
             throw new RuntimeException("Подключение к этой бирже уже существует");
@@ -80,6 +84,7 @@ public class ExchangeConnectionService {
 
         exchangeConnectionRepository.save(connection);
     }
+
     public ExchangeConnection getConnectionById(Long connectionId) {
         return exchangeConnectionRepository.findById(connectionId)
                 .orElseThrow(() -> new RuntimeException("Подключение не найдено"));
