@@ -45,11 +45,12 @@ public class User {
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled = true;
 
+    // ✅ Убедимся что эти поля правильно инициализированы:
     @Column(name = "is_2fa_enabled", nullable = false)
-    private Boolean is2faEnabled = false;
+    private Boolean is2faEnabled = false; // По умолчанию false
 
     @Column(name = "secret_2fa", length = 32)
-    private String secret2fa;
+    private String secret2fa; // Может быть null
 
     @Column(name = "failed_login_attempts")
     private Integer failedLoginAttempts = 0;
@@ -90,12 +91,11 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.isEnabled = true;
-        this.is2faEnabled = false;
+        this.is2faEnabled = false; // ✅ Явно инициализируем
         this.emailVerified = false;
         this.failedLoginAttempts = 0;
         this.accountLocked = false;
     }
-
     // Метод для блокировки аккаунта
     public void lockAccount() {
         this.accountLocked = true;
