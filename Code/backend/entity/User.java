@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -42,15 +44,21 @@ public class User {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
+    // ✅ Добавляем поддержку ролей
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private List<UserRole> roles = new ArrayList<>();
+
     @Column(name = "is_enabled", nullable = false)
     private Boolean isEnabled = true;
 
-    // ✅ Убедимся что эти поля правильно инициализированы:
     @Column(name = "is_2fa_enabled", nullable = false)
-    private Boolean is2faEnabled = false; // По умолчанию false
+    private Boolean is2faEnabled = false;
 
     @Column(name = "secret_2fa", length = 32)
-    private String secret2fa; // Может быть null
+    private String secret2fa;
 
     @Column(name = "failed_login_attempts")
     private Integer failedLoginAttempts = 0;
@@ -76,6 +84,19 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    // ✅ Добавляем поля для подписки
+    @Column(name = "subscription_type", length = 20)
+    private String subscriptionType = "FREE";
+
+    @Column(name = "subscription_expires")
+    private LocalDateTime subscriptionExpires;
+
+    @Column(name = "max_exchange_connections")
+    private Integer maxExchangeConnections = 3;
+
+    @Column(name = "max_transactions_per_year")
+    private Integer maxTransactionsPerYear = 1000;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -91,11 +112,39 @@ public class User {
         this.firstName = firstName;
         this.lastName = lastName;
         this.isEnabled = true;
-        this.is2faEnabled = false; // ✅ Явно инициализируем
+        this.is2faEnabled = false;
         this.emailVerified = false;
         this.failedLoginAttempts = 0;
         this.accountLocked = false;
+        this.roles = List.of(UserRole.ROLE_USER); // По умолчанию обычный пользователь
+        this.subscriptionType = "FREE";
+        this.maxExchangeConnections = 3;
+        this.maxTransactionsPerYear = 1000;
     }
+
+    // Методы для работы с ролями
+    public void addRole(UserRole role) {
+        if (!this.roles.contains(role)) {
+            this.roles.add(role);
+        }
+    }
+
+    public void removeRole(UserRole role) {
+        this.roles.remove(role);
+    }
+
+    public boolean hasRole(UserRole role) {
+        return this.roles.contains(role);
+    }
+
+    public boolean isAdmin() {
+        return hasRole(UserRole.ROLE_ADMIN) || hasRole(UserRole.ROLE_SUPER_ADMIN);
+    }
+
+    public boolean isPremium() {
+        return hasRole(UserRole.ROLE_PREMIUM) || isAdmin();
+    }
+
     // Метод для блокировки аккаунта
     public void lockAccount() {
         this.accountLocked = true;
@@ -129,5 +178,14 @@ public class User {
     public boolean isLockExpired() {
         if (lockTime == null) return false;
         return LocalDateTime.now().isAfter(lockTime.plusHours(1));
+    }
+
+    // Метод для проверки лимитов
+    public boolean canAddExchangeConnection(int currentConnections) {
+        return currentConnections < maxExchangeConnections || isPremium();
+    }
+
+    public boolean canImportTransactions(int currentTransactions) {
+        return currentTransactions < maxTransactionsPerYear || isPremium();
     }
 }

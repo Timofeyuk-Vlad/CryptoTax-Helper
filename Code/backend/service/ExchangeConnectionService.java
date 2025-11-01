@@ -80,4 +80,8 @@ public class ExchangeConnectionService {
 
         exchangeConnectionRepository.save(connection);
     }
+    public ExchangeConnection getConnectionById(Long connectionId) {
+        return exchangeConnectionRepository.findById(connectionId)
+                .orElseThrow(() -> new RuntimeException("Подключение не найдено"));
+    }
 }

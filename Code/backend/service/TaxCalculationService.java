@@ -4,6 +4,7 @@ import com.cryptotax.helper.dto.TaxCalculationResultDto;
 import com.cryptotax.helper.entity.*;
 import com.cryptotax.helper.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -13,11 +14,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TaxCalculationService {
 
     private final TransactionRepository transactionRepository;
+    private final NotificationService notificationService;
 
     public TaxCalculationResultDto calculateTaxes(Long userId, int taxYear) {
         // Создаем временного пользователя для запроса
@@ -46,6 +49,13 @@ public class TaxCalculationService {
         // Расчет налога для РФ
         BigDecimal taxAmount = calculateTaxForRussia(taxableProfit);
         result.setTaxAmount(taxAmount);
+
+        // Отправляем уведомление о готовности расчета
+        try {
+            notificationService.notifyTaxCalculationReady(userId, taxYear, result.getTaxAmount().toString());
+        } catch (Exception e) {
+            log.warn("Не удалось отправить уведомление о расчете налогов: {}", e.getMessage());
+        }
 
         return result;
     }
