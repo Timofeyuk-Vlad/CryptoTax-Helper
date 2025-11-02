@@ -8,10 +8,12 @@
 
 ## 1. Аутентификация
 
-
+![state1](https://github.com/user-attachments/assets/83ed3638-ccfd-415b-a9ce-8f6076aa675b)
 
 ## 2. Импорт и синхронизация с биржами
 
-
+![state2](https://github.com/user-attachments/assets/8e38e501-9533-47a7-9a9b-2fb13e154825)
 
 ## 3. Генерация отчета и расчет налогов
+
+![state3](https://github.com/user-attachments/assets/db785d83-e376-4ab7-81eb-cacd8c7fd44f)
