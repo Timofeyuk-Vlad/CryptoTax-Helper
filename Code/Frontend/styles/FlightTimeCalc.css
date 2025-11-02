@@ -1,0 +1,195 @@
+/* 📦 Контейнер */
+.flighttime-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ✈️ Заголовок */
+.flighttime-header {
+    background-color: #7EBFFF;
+    padding: 0.4rem 0.6rem;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.flighttime-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* 📦 Основной контент */
+.flighttime-layout {
+    display: block;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.flighttime-left {
+    width: 100%;
+}
+
+.flighttime-right {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* 📊 Карточки */
+.flighttime-card {
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 0.8rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.flighttime-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.flighttime-row-label {
+    font-weight: 700;
+    color: #374151;
+}
+
+.flighttime-row-value {
+    color: #111827;
+}
+
+.flighttime-status {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.flighttime-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #b91c1c;
+}
+
+/* 🗺️ Карта */
+.flighttime-map-card {
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background-color: #fff;
+    padding: 0.8rem 1rem;
+}
+
+.flighttime-map-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.flighttime-map-box {
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 340px;
+}
+
+/* 🔙 Кнопка назад */
+.flighttime-back-button {
+    margin-top: 1.5rem;
+    background-color: #7EBFFF;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.flighttime-back-button:hover {
+    background-color: #6aa8e6;
+}
+
+/* Управление видимостью кнопок */
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
+/* 🖥️ ПК-версия */
+@media (min-width: 1024px) {
+    .flighttime-layout {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        padding: 1rem 2rem;
+    }
+
+    .flighttime-left {
+        width: 55%;
+    }
+
+    .flighttime-right {
+        width: 45%;
+        margin-top: 0;
+    }
+
+    .flighttime-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .flighttime-map-box {
+        height: 400px;
+    }
+}
+
+/* 📱 Мобильная версия */
+@media (max-width: 1023px) {
+    .desktop-only {
+        display: none;
+    }
+
+    .mobile-only {
+        display: block;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .flighttime-header {
+        padding: 0.2rem 0.5rem;
+        height: 50px;
+        /* 🔥 центрируем содержимое */
+        display: flex;
+        align-items: center;   /* выравнивание по вертикали */
+        justify-content: center; /* опционально: по центру по горизонтали */
+        text-align: center;
+    }
+
+    .flighttime-header h2 {
+        font-size: 1rem;
+    }
+
+    .flighttime-layout {
+        padding: 0.8rem;
+        font-size: 0.8rem;
+        display: block;
+    }
+
+    .flighttime-map-box {
+        height: 250px;
+    }
+
+    .flighttime-back-button {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.9rem;
+    }
+}

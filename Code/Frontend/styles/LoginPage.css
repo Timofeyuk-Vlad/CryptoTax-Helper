@@ -1,0 +1,267 @@
+/* 📦 Контейнер */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 🔝 Верхняя секция */
+.login-top {
+    flex: 1;
+    background-color: #7EBFFF;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.login-content {
+    text-align: center;
+    color: white;
+    z-index: 2;
+    position: relative;
+    margin-bottom: 60px;
+}
+
+.welcome-text {
+    font-size: 2rem;
+    font-weight: 300;
+    color: #575757;
+    margin: 3rem 0 0;
+    opacity: 0.9;
+}
+
+.app-name {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: black;
+    margin: 0 0 3rem 0;
+}
+
+.login-airplane-container {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+}
+
+.airplane-image {
+    width: 200px;
+    height: auto;
+    max-width: 100%;
+
+}
+
+/* 🌈 Арки */
+.arcs-container {
+    position: absolute;
+    bottom: -120px;
+    left: 0;
+    right: 0;
+    height: 200px;
+    overflow: hidden;
+}
+
+.arc {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150%;
+    height: 300%;
+    border-radius: 200% / 100%;
+}
+
+.arc.white1 { background-color: white; bottom: 0; z-index: 2; }
+.arc.blue1 { background-color: #7EBFFF; bottom: -10px; z-index: 1; }
+.arc.white2 { background-color: white; bottom: 130px; z-index: 4; }
+.arc.blue2 { background-color: #7EBFFF; bottom: 120px; z-index: 3; }
+.arc.blue0 { background-color: #7EBFFF; bottom: 140px; z-index: 5; }
+
+/* 🔻 Нижняя секция */
+.login-bottom {
+    flex: 1;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.bottom-content {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.form-container input {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* 🛑 Ошибки */
+.error-box {
+    color: #ff4444;
+    background-color: #ffe6e6;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+.error-clear {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #ff4444;
+}
+
+/* 🔘 Кнопки */
+.primary-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: #7EBFFF;
+    color: black;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.secondary-btn {
+    width: 100%;
+    padding: 1rem;
+    background-color: transparent;
+    color: #7F7F7F;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: color 0.3s ease;
+}
+
+.help-link {
+    background-color: transparent;
+    border: none;
+    color: #7EBFFF;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+/* 📱 Адаптив */
+@media (max-width: 768px) {
+
+    .login-content {
+        text-align: center;
+        color: white;
+        z-index: 2;
+        position: relative;
+        margin-top: 0px;
+        margin-bottom: 60px;
+    }
+
+    .welcome-text {
+        font-size: 2rem;
+        margin-top: 0rem;
+    }
+
+    .app-name {
+        font-size: 3rem;
+        margin-bottom: 2rem;
+    }
+
+    .airplane-image {
+        width: 200px;
+    }
+
+    .arcs-container {
+        position: absolute;
+        bottom: -90px;
+        left: 0;
+        right: 0;
+        height: 185px;
+        overflow: hidden;
+    }
+
+    .login-bottom {
+        padding: 1.5rem 1rem;
+    }
+
+    .form-container input {
+        padding: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .primary-btn, .secondary-btn {
+        padding: 0.8rem;
+        font-size: 1rem;
+    }
+}
+
+/* 🖥️ ПК */
+@media (min-width: 1024px) {
+
+    .login-content {
+        text-align: center;
+        color: white;
+        z-index: 2;
+        position: relative;
+        margin-top: -30px;
+        margin-bottom: 60px;
+    }
+
+    .welcome-text {
+        font-size: 2rem;
+    }
+    .app-name {
+        font-size: 3rem;
+    }
+    .airplane-image {
+        width: 240px;
+    }
+
+    .secondary-btn {
+        width: 100%;
+        padding: 0.5rem;
+        background-color: transparent;
+        color: #7F7F7F;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-bottom: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .help-link {
+        background-color: transparent;
+        border: none;
+        color: #7EBFFF;
+        cursor: pointer;
+        margin-top: -100px;
+        font-size: 0.9rem;
+        text-decoration: underline;
+    }
+}

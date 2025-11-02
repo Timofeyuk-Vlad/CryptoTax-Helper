@@ -1,0 +1,255 @@
+/* 📌 Базовый стиль хэдэра */
+.header {
+    max-width: 100%;
+    background-color: white;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.4rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 🍔 Бургер-меню */
+.burger-container {
+    position: relative;
+}
+
+.burger-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.6rem 0.5rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.burger-icon {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.burger-icon span {
+    width: 18px;
+    height: 2px;
+    background-color: #7EBFFF;
+    transition: all 0.2s ease;
+}
+
+.burger-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 160px;
+    z-index: 1001;
+    margin-top: 0.4rem;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.burger-item {
+    background: none;
+    border: none;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #333;
+    transition: background 0.2s ease;
+}
+
+.burger-item:hover {
+    background: #f0f8ff;
+}
+
+/* 📍 Геолокация */
+.location {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.location-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.city-text {
+    color: black;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+/* 👤 Профиль */
+.profile-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.profile-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #7EBFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.profile-icon {
+    width: 26px;
+    height: 26px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 180px;
+    z-index: 1001;
+    margin-top: 0.4rem;
+    overflow: hidden;
+}
+
+.menu-header {
+    padding: 0.8rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.user-email {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.2rem;
+}
+
+.user-status {
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 500;
+}
+
+.menu-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 0.25rem 0;
+}
+
+.menu-item {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: #333;
+    transition: all 0.2s ease;
+    text-align: left;
+}
+
+.menu-item:hover {
+    background: #f0f8ff;
+}
+
+.logout {
+    color: #ef4444;
+}
+
+/* 🖥️ ПК-версия — иконки больше */
+@media (min-width: 1024px) {
+    .location-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .burger-icon span {
+        width: 22px;
+        height: 3px;
+    }
+
+    .burger-button {
+        height: 56px;
+    }
+
+    .profile-circle {
+        width: 44px;
+        height: 44px;
+    }
+
+    .profile-icon {
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* 📱 Мобильные остаются прежними */
+@media (max-width: 768px) {
+
+    .header {
+        border-bottom: 1px solid #e0e0e0;
+        padding: 0.1rem 0.7rem;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .location-icon {
+        width:27px;
+        height: 27px;
+    }
+
+    .city-text {
+        color: black;
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin-bottom: 0.2rem;
+    }
+
+    .burger-icon span {
+        width: 25px;
+        height: 2px;
+    }
+
+    .profile-circle {
+        width: 35px;
+        height: 35px;
+    }
+
+    .profile-icon {
+        width: 25px;
+        height: 25px;
+    }
+}
+
+

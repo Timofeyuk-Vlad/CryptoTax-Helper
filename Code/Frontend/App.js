@@ -1,39 +1,174 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Header from './components/layout/Header';
+import Home from './pages/Home';
+import Flights from './pages/Flights';
+import Subscriptions from './pages/Subscriptions';
+import Profile from './pages/Profile';
+import ProfilePage from "./pages/ProfilePage";
+import MyFlights from "./pages/MyFlights";
+import LoginPage from './pages/LoginPage';
+import FlightTimeCalc from "./pages/FlightTimeCalc";
+import FlightDetails from './pages/FlightDetails';
+import './styles/App.css';
+import { subscribeUserToPush } from "./utils/pushManager"; // ✅ импортируем утилиту для пушей
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import TaxProfile from "./pages/TaxProfile";
-import ExchangeConnections from "./pages/ExchangeConnections";
-import Transactions from "./pages/Transactions";
-import Reports from "./pages/Reports";
-import TaxCalculation from "./pages/TaxCalculation";
-import AccountSettings from "./pages/AccountSettings";
+/* =========================
+   Layout с автоматическим Header
+   ========================= */
+const Layout = ({ children }) => {
+    const location = useLocation();
+    const showHeader = location.pathname !== '/login';
+    return (
+        <div className="App">
+            {showHeader && <Header />}
+            <main>{children}</main>
+        </div>
+    );
+};
 
-export default function App() {
+/* =========================
+   Защита маршрутов
+   ========================= */
+const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated } = useAuth();
+
+    // 📡 При входе в систему — подписываем пользователя на push
+    useEffect(() => {
+        if (isAuthenticated) {
+            subscribeUserToPush().catch(console.error);
+        }
+    }, [isAuthenticated]);
+
+    return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+/* =========================
+   Основное приложение
+   ========================= */
+function App() {
+    // 🛠️ Регистрируем Service Worker при старте приложения
+    useEffect(() => {
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker
+                    .register("/service-worker.js")
+                    .then((reg) => console.log("✅ Service Worker зарегистрирован:", reg.scope))
+                    .catch((err) => console.error("❌ Ошибка регистрации Service Worker:", err));
+            });
+        }
+    }, []);
+
     return (
         <AuthProvider>
-            <BrowserRouter>
+            <Router>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/login" replace />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
+                    {/* 🏠 Главная страница */}
+                    <Route
+                        path="/"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <Home />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
 
-                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-                    <Route path="/tax-profile" element={<ProtectedRoute><TaxProfile /></ProtectedRoute>} />
-                    <Route path="/connections" element={<ProtectedRoute><ExchangeConnections /></ProtectedRoute>} />
-                    <Route path="/transactions" element={<ProtectedRoute><Transactions /></ProtectedRoute>} />
-                    <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-                    <Route path="/tax-calculation" element={<ProtectedRoute><TaxCalculation /></ProtectedRoute>} />
-                    <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
-                    <Route path="/settings" element={<AccountSettings />} />
+                    {/* 🔑 Страница логина */}
+                    <Route path="/login" element={<LoginPage />} />
 
-                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                    {/* ✈️ Список всех рейсов */}
+                    <Route
+                        path="/flights"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <Flights />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 📍 Детали рейса по ID */}
+                    <Route
+                        path="/flights/:flightId"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <FlightDetails />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 📍 Детали рейса по номеру */}
+                    <Route
+                        path="/flights/number/:flightNumber"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <FlightDetails />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* ✈️ Мои рейсы */}
+                    <Route
+                        path="/my-flights"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <MyFlights />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 🕒 Страница расчёта времени */}
+                    <Route
+                        path="/flights/:flightId/calculate"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <FlightTimeCalc />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 👤 Профиль */}
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <ProfilePage />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 📬 Подписки */}
+                    <Route
+                        path="/subscriptions"
+                        element={
+                            <ProtectedRoute>
+                                <Layout>
+                                    <Subscriptions />
+                                </Layout>
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    {/* 🌐 Фолбэк */}
+                    <Route path="*" element={<Navigate to="/login" replace />} />
                 </Routes>
-            </BrowserRouter>
+            </Router>
         </AuthProvider>
     );
 }
+
+export default App;

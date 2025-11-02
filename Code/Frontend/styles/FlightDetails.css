@@ -1,0 +1,282 @@
+/* 📦 Контейнер всей страницы */
+.flight-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f9fafb;
+}
+
+/* ✈️ Заголовок */
+.flight-header {
+
+    background-color: #7EBFFF;
+    padding: 0.4rem 0.6rem;
+    text-align: center;
+    width: 100%;
+    height: auto; /* можно убрать фиксированную высоту, чтобы текст не вылезал */
+    box-sizing: border-box;
+
+    display: flex;                /* ✅ превращаем в flex-контейнер */
+    flex-direction: column;       /* ✅ выстраиваем h2 и p вертикально */
+    align-items: center;          /* ✅ центрируем по горизонтали */
+    justify-content: center;      /* ✅ центрируем по вертикали */
+}
+
+.flight-header h2 {
+    margin: 0;                    /* ✅ убираем отступы */
+    font-size: 1.3rem;
+}
+
+.flight-header p {
+    margin: 0.5rem 0 0 0;
+/* ✅ маленький отступ сверху, чтобы отделить от h2 */
+    font-size: 0.95rem;
+    color: #333;
+}
+
+
+/* 📦 Основной контент */
+.details-layout {
+    display: block;
+    padding: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.details-left {
+    width: 100%;
+}
+
+/* 📷 Терминал */
+.terminal-mobile {
+    text-align: center;
+    margin: 0.8rem 0;
+}
+
+.terminal-image {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 8px;
+}
+
+.details-right {
+    display: none;
+}
+
+/* ✈️ Блок с направлением */
+.route-block {
+    background-color: #7EBFFF;
+    padding: 0.8rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+    margin-top: 0.8rem;
+}
+
+.route-block h3 {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.toggle-button {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+}
+
+/* 📊 Таблица */
+.table {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    overflow: hidden;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.cell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.with-border {
+    border-right: 1px solid #d0d7de;
+    padding-right: 1rem;
+    margin-right: 1rem;
+}
+
+.delay-text {
+    color: orange;
+    margin-top: 0.3rem;
+}
+
+.cancelled-block {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background-color: #ffe6e6;
+    color: red;
+    font-weight: bold;
+    border-radius: 8px;
+}
+
+.gate-block {
+    background-color: #7EBFFF;
+    padding: 0.8rem;
+    text-align: center;
+    border-radius: 8px;
+    margin-top: 0.8rem;
+    font-weight: bold;
+}
+
+.boarding-time {
+    margin-top: 0.6rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.completed-footer,
+.cancelled-footer {
+    margin-top: 0.8rem;
+    text-align: center;
+    font-weight: bold;
+}
+
+.completed-footer {
+    color: green;
+}
+
+.cancelled-footer {
+    color: red;
+}
+
+/* 🔙 Кнопка назад */
+.back-button {
+    margin-top: 1.5rem;
+    background-color: #7EBFFF;
+    border: none;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* 🖥️ ПК-версия */
+@media (min-width: 1024px) {
+    .details-layout {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 2rem;
+        padding: 0.5rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .details-left {
+        width: 55%;
+    }
+
+    .details-right {
+        display: flex;
+        width: 45%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .terminal-mobile {
+        display: none;
+    }
+
+    .terminal-image {
+        margin-top: 60px;
+
+        max-width: 120%;
+    }
+
+    .flight-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .back-button {
+        width: auto;
+        margin-top: 2rem;
+    }
+}
+
+/* 📱 📏 Мобильная адаптация */
+@media (max-width: 768px) {
+    .flight-header {
+        padding: 0.1rem 0.5rem;
+        height: 50px;
+    }
+
+    .flight-header h2 {
+        font-size: 1rem;
+    }
+
+    .flight-header p {
+        font-size: 0.6rem;
+    }
+
+    .details-layout {
+        padding: 1rem;
+    }
+
+    .terminal-mobile {
+        margin: 1.5rem 0;
+    }
+
+    .terminal-image {
+        max-width: 110%;
+    }
+
+    .route-block {
+        padding: 0.7rem 0.9rem;
+        margin-top: 0.7rem;
+    }
+
+    .route-block h3 {
+        font-size: 1rem;
+    }
+
+    .toggle-button {
+        font-size: 0.9rem;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+
+    .row {
+        padding: 0.5rem 0.6rem;
+    }
+
+    .gate-block {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+    }
+
+    .boarding-time {
+        font-size: 0.9rem;
+    }
+
+    .back-button {
+        padding: 0.4rem 0.7rem;
+        font-size: 0.9rem;
+        margin-top: 0.8rem;
+        width: 100%;
+    }
+}

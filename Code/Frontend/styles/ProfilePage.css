@@ -1,0 +1,173 @@
+/* 📦 Контейнер страницы */
+.profile-page {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem 1.5rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-sizing: border-box;
+    min-height: 70vh;
+    position: relative;
+}
+
+/* ✈️ Самолёт — по умолчанию скрыт */
+.profile-airplane-section {
+    display: none;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.airplane-image {
+    width: 180px;
+    height: auto;
+    max-width: 100%;
+}
+
+/* 🧑‍💻 Заголовок */
+.profile-title {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* 📑 Форма */
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* 🪶 Поля ввода */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #444;
+    font-size: 1rem;
+}
+
+.form-group input {
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #7ebfff;
+    background: #fff;
+}
+
+/* 🖱️ Кнопка */
+.save-button {
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    border: none;
+    transition: all 0.3s ease;
+    margin-bottom: 10px;
+}
+
+.save-button.active {
+    background: #7ebfff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.save-button.active:hover {
+    background: #6ca8e6;
+}
+
+.save-button.inactive {
+    background: #e0e0e0;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* ✅ Сообщения */
+.message {
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 600;
+    color: #333;
+}
+
+/* ⏳ Загрузка */
+.loading {
+    text-align: center;
+    margin-top: 4rem;
+    font-size: 1.3rem;
+    color: #666;
+}
+
+/* 🖥️ ПК */
+@media (min-width: 1024px) {
+    .profile-page {
+        max-width: 700px;
+        padding: 0rem 3rem;
+    }
+
+    .profile-title {
+        font-size: 2rem;
+        margin-top: -15px;
+        margin-bottom: -10px;
+    }
+
+    .form-group input {
+        font-size: 1rem;
+    }
+
+    /* 🚫 На ПК самолёт остаётся скрытым */
+    .profile-airplane-section {
+        display: none;
+    }
+}
+
+/* 📱 Мобильная версия */
+@media (max-width: 768px) {
+    .profile-page {
+        margin: 1rem;
+        padding: 1.5rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    /* ✈️ Показываем самолёт */
+    .profile-airplane-section {
+        display: block;
+        margin-top: -10px;
+        margin-bottom: 30px;
+    }
+
+    .airplane-image {
+        width: 180px;
+    }
+
+    .profile-title {
+        font-size: 1.7rem;
+        margin-bottom: 30px;
+    }
+
+    .form-group label {
+        font-size: 1rem;
+    }
+
+    .form-group input {
+        font-size: 1.2rem;
+        padding: 0.7rem;
+    }
+
+    .save-button {
+        font-size: 1rem;
+        padding: 0.8rem;
+    }
+}

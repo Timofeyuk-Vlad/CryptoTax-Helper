@@ -1,0 +1,286 @@
+.home-container {
+    min-height: 100vh;
+    background: #fff;
+    padding: 1.5rem;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* ✈️ Самолёт */
+.home-airplane-section {
+    display: flex;
+    align-items: center;
+    z-index: 10;
+}
+
+.home-airplane-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.home-airplane-image {
+    display: block;
+    width: 240px;
+    height: auto;
+    margin: auto;
+}
+
+/* 🔍 Поиск */
+.home-search-section {
+    padding: 0 0 2rem;
+}
+
+.home-search-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.home-search-container {
+    display: flex;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px 0 -10px;
+}
+
+.home-loading-text{
+    margin-left: 600px;
+}
+
+.home-search-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    background: #f8f9fa;
+}
+
+.home-search-button {
+    padding: 1rem 1.5rem;
+    background: #7EBFFF;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s ease;
+}
+
+.home-search-button:hover {
+    background: #6ca8e6;
+}
+
+/* 📜 История рейсов */
+.home-recent-section {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1rem 0;
+}
+
+.home-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: -10px;
+    margin-bottom: 1rem;
+}
+
+.home-section-title {
+    color: #000;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.home-refresh-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+    margin-bottom: -10px;
+}
+
+.home-refresh-button:hover {
+    background: rgba(126, 191, 255, 0.1);
+}
+
+/* ✈️ Список рейсов */
+.home-flights-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* 📦 Карточка рейса */
+.home-flight-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: #7EBFFF;
+    padding: 0.3rem 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 75px;
+    box-sizing: border-box;
+}
+
+.home-flight-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 📄 Текст */
+.home-flight-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 0.3rem;
+    flex: 1;
+}
+
+.home-flight-header {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+    line-height: 1;
+}
+
+.home-flight-number {
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0;
+    padding: 0;
+}
+
+.home-flight-route {
+    color: #000;
+    font-size: 0.95rem;
+    opacity: 0.9;
+    margin-left: 8px;
+}
+
+/* ❤️ Кнопка подписки */
+.home-heart-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    margin-top: 13px;
+}
+
+.home-heart-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 🖥️ ПК */
+@media (min-width: 1024px) {
+    .home-flight-item {
+        padding: 1.5rem 2rem;
+        min-height: 90px;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    .home-flights-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .home-flight-number {
+        font-size: 1.2rem;
+    }
+
+    .home-flight-route {
+        font-size: 1rem;
+        margin-left: 0px;
+    }
+
+    .home-heart-button {
+        margin-top: 0px;
+        min-width: 50px;
+        min-height: 50px;
+    }
+
+    .home-flights-list {
+        max-width: 800px;
+        margin: 0 auto;
+        gap: 1.2rem;
+    }
+}
+
+/* 📱 Мобильная версия */
+@media (max-width: 768px) {
+
+    .home-flights-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .home-airplane-image {
+        width: 240px;
+        margin-top: 60px;
+    }
+
+    .home-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: -10px;
+        margin-bottom: 2rem;
+    }
+
+    .home-search-section {
+        padding: 0 0 2rem;
+        margin-top: 70px;
+        margin-bottom: 40px;
+    }
+
+    .home-search-input {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border: none;
+        font-size: 0.73rem;
+        outline: none;
+        background: #f8f9fa;
+    }
+
+    .home-flight-item {
+        min-height: 72px;
+        padding: 0.3rem 1rem;
+    }
+
+    .home-flight-number {
+        font-size: 1rem;
+        margin-left: -5px;
+        margin-top: 10px;
+    }
+
+    .home-flight-route {
+        font-size: 0.85rem;
+        margin-left: -5px;
+    }
+
+    .home-section-title {
+        font-size: 1.3rem;
+    }
+}
