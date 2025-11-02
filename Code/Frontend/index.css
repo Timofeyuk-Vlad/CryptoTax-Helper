@@ -1,0 +1,12 @@
+html, body {
+  background-color: #fff;
+  color: #000;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
+* {
+  image-rendering: pixelated;
+  text-shadow: 0.5px 0.5px 0 #00000020;
+  box-shadow: none !important;
+  outline: none;
+}
