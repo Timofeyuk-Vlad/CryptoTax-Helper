@@ -23,6 +23,9 @@ public class SecurityUtils {
             throw new RuntimeException("Пользователь не аутентифицирован");
         }
 
+        System.out.println("🔐 Authentication: " + authentication);
+        System.out.println("👤 Principal: " + authentication.getPrincipal());
+
         String email;
         Object principal = authentication.getPrincipal();
 

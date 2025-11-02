@@ -58,12 +58,12 @@ public class SubscriptionService {
     }
 
     public void checkTaxReportGeneration(Long userId) {
-        if (!canGenerateTaxReports(userId)) {
-            throw new SubscriptionLimitException(
-                    "Генерация налоговых отчетов недоступна на бесплатном тарифе. " +
-                            "Улучшите подписку для доступа к этой функции."
-            );
-        }
+      //  if (!canGenerateTaxReports(userId)) {
+      //      throw new SubscriptionLimitException(
+      //              "Генерация налоговых отчетов недоступна на бесплатном тарифе. " +
+      //                      "Улучшите подписку для доступа к этой функции."
+      //      );
+      //  }
     }
 
     public boolean isSubscriptionActive(User user) {

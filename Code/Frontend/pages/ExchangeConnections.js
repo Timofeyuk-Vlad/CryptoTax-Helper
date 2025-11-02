@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { Box, Button, Container, Paper, TextField, Typography } from "@mui/material";
+import {
+    Box,
+    Button,
+    Container,
+    Paper,
+    TextField,
+    Typography,
+    Fade,
+} from "@mui/material";
 import Navbar from "../components/Navbar";
 import { ExchangeAPI } from "../api/api";
 
 export default function ExchangeConnections() {
     const [list, setList] = useState([]);
-    const [form, setForm] = useState({ exchange: "BINANCE", apiKey: "", apiSecret: "" });
+    const [form, setForm] = useState({
+        exchange: "BINANCE",
+        apiKey: "",
+        apiSecret: "",
+    });
     const [msg, setMsg] = useState("");
 
     const load = () =>
@@ -21,19 +33,19 @@ export default function ExchangeConnections() {
         setMsg("");
         try {
             await ExchangeAPI.connect(form);
-            setMsg("Подключено");
+            setMsg("✅ Биржа подключена");
             setForm({ exchange: "BINANCE", apiKey: "", apiSecret: "" });
             load();
         } catch {
-            setMsg("Ошибка подключения");
+            setMsg("❌ Ошибка подключения");
         }
     };
 
-    const importFromExchange = async (connectionId) => {
+    const importFromExchange = async (id) => {
         setMsg("");
         try {
-            await ExchangeAPI.importBinance(connectionId);
-            setMsg(`Импорт с подключения #${connectionId} запущен`);
+            await ExchangeAPI.importBinance(id);
+            setMsg(`📦 Импорт с подключения #${id} запущен`);
         } catch {
             setMsg("Ошибка импорта");
         }
@@ -42,60 +54,101 @@ export default function ExchangeConnections() {
     return (
         <>
             <Navbar />
-            <Container sx={{ mt: 3 }}>
-                <Paper sx={{ p: 3, mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>
-                        Подключённые биржи
-                    </Typography>
-                    <Box sx={{ mb: 1 }}>
-                        {list?.length ? (
-                            list.map((c) => (
-                                <Box key={c.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                                    <Typography>
-                                        • {c.exchange} — {c.status || "OK"}
-                                    </Typography>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        onClick={() => importFromExchange(c.id)} // 👈 вот тут передаётся ID
+            <Container
+                sx={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "column",
+                    gap: 3,
+                }}
+            >
+                <Fade in timeout={400}>
+                    <Paper sx={{ p: 4, width: "100%", maxWidth: 600, boxShadow: 4 }}>
+                        <Typography variant="h5" gutterBottom align="center">
+                            Подключённые биржи
+                        </Typography>
+
+                        <Box sx={{ mt: 2 }}>
+                            {list.length ? (
+                                list.map((c) => (
+                                    <Box
+                                        key={c.id}
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
+                                            mb: 1,
+                                        }}
                                     >
-                                        Импортировать
-                                    </Button>
-                                </Box>
-                            ))
-                        ) : (
-                            <Typography color="text.secondary">Нет подключений</Typography>
+                                        <Typography>
+                                            • {c.exchange} — {c.status || "OK"}
+                                        </Typography>
+                                        <Button
+                                            variant="outlined"
+                                            size="small"
+                                            onClick={() => importFromExchange(c.id)}
+                                        >
+                                            Импортировать
+                                        </Button>
+                                    </Box>
+                                ))
+                            ) : (
+                                <Typography color="text.secondary">
+                                    Нет активных подключений
+                                </Typography>
+                            )}
+                        </Box>
+
+                        {msg && (
+                            <Typography align="center" sx={{ mt: 2 }}>
+                                {msg}
+                            </Typography>
                         )}
-                    </Box>
+                    </Paper>
+                </Fade>
 
-                    {msg && <Typography sx={{ mt: 1 }}>{msg}</Typography>}
-                </Paper>
+                <Fade in timeout={500}>
+                    <Paper sx={{ p: 4, width: "100%", maxWidth: 600, boxShadow: 4 }}>
+                        <Typography variant="h5" gutterBottom align="center">
+                            Добавить подключение
+                        </Typography>
 
-                <Paper sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                        Добавить подключение
-                    </Typography>
-                    <Box sx={{ display: "grid", gap: 2, maxWidth: 520 }}>
-                        <TextField
-                            label="Биржа"
-                            value={form.exchange}
-                            onChange={(e) => setForm({ ...form, exchange: e.target.value })}
-                        />
-                        <TextField
-                            label="API Key"
-                            value={form.apiKey}
-                            onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
-                        />
-                        <TextField
-                            label="API Secret"
-                            value={form.apiSecret}
-                            onChange={(e) => setForm({ ...form, apiSecret: e.target.value })}
-                        />
-                        <Button variant="contained" onClick={connect}>
-                            Подключить
-                        </Button>
-                    </Box>
-                </Paper>
+                        <Box sx={{ display: "grid", gap: 2, mt: 2 }}>
+                            <TextField
+                                label="Биржа"
+                                value={form.exchange}
+                                onChange={(e) =>
+                                    setForm({ ...form, exchange: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="API Key"
+                                value={form.apiKey}
+                                onChange={(e) =>
+                                    setForm({ ...form, apiKey: e.target.value })
+                                }
+                            />
+                            <TextField
+                                label="API Secret"
+                                value={form.apiSecret}
+                                onChange={(e) =>
+                                    setForm({ ...form, apiSecret: e.target.value })
+                                }
+                            />
+
+                            <Button
+                                variant="contained"
+                                size="large"
+                                onClick={connect}
+                                fullWidth
+                            >
+                                Подключить
+                            </Button>
+                        </Box>
+                    </Paper>
+                </Fade>
             </Container>
         </>
     );

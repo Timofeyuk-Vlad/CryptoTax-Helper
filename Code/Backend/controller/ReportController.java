@@ -41,9 +41,15 @@ public class ReportController {
     }
 
     @PostMapping("/tax/pdf")
-    public ResponseEntity<byte[]> generateTaxReportPdf(@RequestParam(defaultValue = "2024") int year) {
+    public ResponseEntity<byte[]> generateTaxReportPdf(
+            @RequestParam(defaultValue = "2024") int year,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
         try {
-            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
+
+            //log.info("🧾 Генерация PDF: user={}, year={}, from={}, to={}", userId, year, from, to);
 
             byte[] pdfBytes = pdfReportService.generateTaxReportPdf(userId, year);
 

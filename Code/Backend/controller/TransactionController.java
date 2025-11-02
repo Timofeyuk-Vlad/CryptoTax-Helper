@@ -95,4 +95,23 @@ public class TransactionController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
     }
+
+    @GetMapping
+    public ResponseEntity<?> getUserTransactions() {
+        try {
+            Long userId = securityUtils.getCurrentUserId();
+            User user = new User();
+            user.setId(userId);
+
+            List<Transaction> transactions = transactionRepository
+                    .findByUserOrderByTimestampDesc(user);
+
+            log.info("📦 Найдено {} транзакций для пользователя {}", transactions.size(), userId);
+            return ResponseEntity.ok(transactions);
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка при загрузке транзакций", e);
+            return ResponseEntity.status(403).body(Map.of("error", e.getMessage()));
+        }
+    }
 }

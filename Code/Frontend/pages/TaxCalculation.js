@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Box, Button, Container, Paper, TextField, Typography, MenuItem } from "@mui/material";
+import {
+    Box,
+    Button,
+    Container,
+    Paper,
+    TextField,
+    Typography,
+    MenuItem,
+    Fade,
+} from "@mui/material";
 import Navbar from "../components/Navbar";
 import { TaxAPI } from "../api/api";
 
@@ -8,7 +17,7 @@ export default function TaxCalculation() {
         method: "FIFO",
         from: "",
         to: "",
-        asset: "", // 👈 добавляем валюту
+        asset: "",
     });
     const [result, setResult] = useState(null);
     const [msg, setMsg] = useState("");
@@ -17,7 +26,6 @@ export default function TaxCalculation() {
         setMsg("");
         setResult(null);
 
-        // 🛑 Проверка полей
         if (!payload.from || !payload.to) {
             setMsg("Please select both start and end dates (From / To).");
             return;
@@ -42,84 +50,116 @@ export default function TaxCalculation() {
     return (
         <>
             <Navbar />
-            <Container sx={{ mt: 3 }}>
-                <Paper sx={{ p: 3, maxWidth: 640 }}>
-                    <Typography variant="h6" gutterBottom>
-                        Tax Calculation
-                    </Typography>
-
-                    <Box sx={{ display: "grid", gap: 2 }}>
-                        <TextField
-                            label="Method"
-                            value={payload.method}
-                            onChange={onChange("method")}
-                        />
-
-                        {/* 👇 поле выбора валюты */}
-                        <TextField
-                            select
-                            label="Currency (asset)"
-                            value={payload.asset}
-                            onChange={onChange("asset")}
-                            helperText="Select the asset to calculate tax for"
+            <Container
+                sx={{
+                    minHeight: "calc(100vh - 64px)", // учёт высоты Navbar
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "flex-start", // не по центру вертикали, чтобы не сжималось
+                    pt: 6, // отступ сверху
+                    pb: 6, // отступ снизу
+                }}
+            >
+                <Fade in timeout={400}>
+                    <Paper
+                        sx={{
+                            p: 4,
+                            width: "100%",
+                            maxWidth: 640,
+                            boxShadow: 4,
+                            borderRadius: 3,
+                        }}
+                    >
+                        <Typography
+                            variant="h5"
+                            gutterBottom
+                            align="center"
+                            sx={{ fontWeight: 600 }}
                         >
-                            <MenuItem value="">All assets</MenuItem>
-                            <MenuItem value="BTC">BTC (Bitcoin)</MenuItem>
-                            <MenuItem value="ETH">ETH (Ethereum)</MenuItem>
-                            <MenuItem value="BNB">BNB (Binance Coin)</MenuItem>
-                            <MenuItem value="USDT">USDT (Tether)</MenuItem>
-                            <MenuItem value="SOL">SOL (Solana)</MenuItem>
-                        </TextField>
+                            Tax Calculation
+                        </Typography>
 
-                        <TextField
-                            label="From (YYYY-MM-DD)"
-                            type="date"
-                            value={payload.from}
-                            onChange={onChange("from")}
-                            InputLabelProps={{ shrink: true }}
-                        />
-                        <TextField
-                            label="To (YYYY-MM-DD)"
-                            type="date"
-                            value={payload.to}
-                            onChange={onChange("to")}
-                            InputLabelProps={{ shrink: true }}
-                        />
+                        <Box sx={{ display: "grid", gap: 2, mt: 2 }}>
+                            <TextField
+                                label="Method"
+                                value={payload.method}
+                                onChange={onChange("method")}
+                                fullWidth
+                            />
 
-                        <Button variant="contained" onClick={calculate}>
-                            Calculate
-                        </Button>
+                            <TextField
+                                select
+                                label="Currency (asset)"
+                                value={payload.asset}
+                                onChange={onChange("asset")}
+                                helperText="Select the asset to calculate tax for"
+                                fullWidth
+                            >
+                                <MenuItem value="">All assets</MenuItem>
+                                <MenuItem value="BTC">BTC (Bitcoin)</MenuItem>
+                                <MenuItem value="ETH">ETH (Ethereum)</MenuItem>
+                                <MenuItem value="BNB">BNB (Binance Coin)</MenuItem>
+                                <MenuItem value="USDT">USDT (Tether)</MenuItem>
+                                <MenuItem value="SOL">SOL (Solana)</MenuItem>
+                            </TextField>
 
-                        {msg && <Typography color="error">{msg}</Typography>}
+                            <TextField
+                                label="From"
+                                type="date"
+                                value={payload.from}
+                                onChange={onChange("from")}
+                                InputLabelProps={{ shrink: true }}
+                                fullWidth
+                            />
 
-                        {result && (
-                            <Box sx={{ mt: 2 }}>
-                                <Typography variant="subtitle1">
-                                    Total tax to pay:&nbsp;
-                                    {result.calculation?.fifoCalculation?.taxAmount
-                                        ? `${result.calculation.fifoCalculation.taxAmount} ${result.calculation.fifoCalculation.currency || "RUB"}`
-                                        : "-"}
+                            <TextField
+                                label="To"
+                                type="date"
+                                value={payload.to}
+                                onChange={onChange("to")}
+                                InputLabelProps={{ shrink: true }}
+                                fullWidth
+                            />
+
+                            <Button variant="contained" size="large" onClick={calculate} fullWidth>
+                                Calculate
+                            </Button>
+
+                            {msg && (
+                                <Typography color="error" align="center" sx={{ mt: 1 }}>
+                                    {msg}
                                 </Typography>
+                            )}
 
-                                <Typography variant="body2" color="text.secondary">
-                                    Profit: {result.calculation?.fifoCalculation?.taxableProfit ?? "-"}
-                                </Typography>
+                            {result && (
+                                <Box sx={{ mt: 3, textAlign: "center" }}>
+                                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                                        💰 Total tax to pay:&nbsp;
+                                        {result.calculation?.fifoCalculation?.taxAmount
+                                            ? `${result.calculation.fifoCalculation.taxAmount} ${result.calculation.fifoCalculation.currency || "RUB"}`
+                                            : "-"}
+                                    </Typography>
 
-                                <Typography variant="body2" color="text.secondary">
-                                    Method: {result.payload?.method || "FIFO"}
-                                </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Profit: {result.calculation?.fifoCalculation?.taxableProfit ?? "-"}
+                                    </Typography>
 
-                                <Typography variant="body2" color="text.secondary">
-                                    Country: {result.country}
-                                </Typography>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Method: {result.payload?.method || "FIFO"}
+                                    </Typography>
 
-                                <Typography variant="body2" color="text.secondary">
-                                    Asset: {payload.asset || "ALL"}
-                                </Typography>
-                            </Box>
-                        )}
-                    </Box>
-                </Paper>
+                                    <Typography variant="body2" color="text.secondary">
+                                        Country: {result.country}
+                                    </Typography>
+
+                                    <Typography variant="body2" color="text.secondary">
+                                        Asset: {payload.asset || "ALL"}
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Box>
+                    </Paper>
+                </Fade>
             </Container>
         </>
     );

@@ -23,8 +23,8 @@ export const AuthAPI = {
 };
 
 export const ProfileAPI = {
-    get: () => api.get("/tax-profile"),
-    save: (payload) => api.put("/tax-profile", payload)
+    get: () => api.get("/tax-profile"),       // OK — совпадает с @GetMapping
+    save: (payload) => api.post("/tax-profile", payload) // ✅ было PUT, теперь POST
 };
 
 export const ExchangeAPI = {
@@ -38,8 +38,17 @@ export const TransactionsAPI = {
 };
 
 export const ReportsAPI = {
-    generatePdf: (params) => api.get("/report/pdf", { params, responseType: "blob" }),
-    generateExcel: (params) => api.get("/report/excel", { params, responseType: "blob" })
+    generatePdf: ({ year }) =>
+        api.post("/reports/tax/pdf", null, {
+            params: { year },
+            responseType: "blob",
+        }),
+
+    generateExcel: ({ year }) =>
+        api.post("/reports/tax/excel", null, {
+            params: { year },
+            responseType: "blob",
+        }),
 };
 
 export const TaxAPI = {
