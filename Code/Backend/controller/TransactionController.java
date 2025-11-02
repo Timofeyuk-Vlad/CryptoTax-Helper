@@ -32,7 +32,7 @@ public class TransactionController {
     public ResponseEntity<?> importDemoTransactions() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             // Создаем временного пользователя для демо
             User demoUser = new User();
@@ -58,7 +58,7 @@ public class TransactionController {
     public ResponseEntity<?> importDemoWithRealPrices() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             // Создаем временного пользователя для демо
             User demoUser = new User();
@@ -85,7 +85,7 @@ public class TransactionController {
     public ResponseEntity<?> calculateTaxes(@RequestParam(defaultValue = "2024") int year) {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             TaxCalculationResultDto result = taxCalculationService.calculateTaxes(userId, year);
 
@@ -113,7 +113,7 @@ public class TransactionController {
     @PostMapping("/tax/fifo-detailed")
     public ResponseEntity<?> calculateFifoTaxesDetailed(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             User user = new User();
             user.setId(userId);
@@ -144,7 +144,7 @@ public class TransactionController {
     public ResponseEntity<?> getTransactionCount() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             long count = transactionImportService.getUserTransactionCount(userId);
 

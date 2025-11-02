@@ -19,7 +19,7 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<?> getUserNotifications() {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             var notifications = notificationService.getUserNotifications(userId);
             return ResponseEntity.ok(notifications);
@@ -34,7 +34,7 @@ public class NotificationController {
     @GetMapping("/unread")
     public ResponseEntity<?> getUnreadNotifications() {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             var notifications = notificationService.getUnreadNotifications(userId);
             return ResponseEntity.ok(notifications);
@@ -49,7 +49,7 @@ public class NotificationController {
     @GetMapping("/unread-count")
     public ResponseEntity<?> getUnreadCount() {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             long count = notificationService.getUnreadCount(userId);
 
@@ -69,7 +69,7 @@ public class NotificationController {
     @PostMapping("/{notificationId}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Long notificationId) {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             notificationService.markAsRead(notificationId, userId);
 
@@ -88,7 +88,7 @@ public class NotificationController {
     @PostMapping("/read-all")
     public ResponseEntity<?> markAllAsRead() {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             notificationService.markAllAsRead(userId);
 
@@ -107,7 +107,7 @@ public class NotificationController {
     @PostMapping("/test")
     public ResponseEntity<?> createTestNotification() {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             var notification = notificationService.createNotification(
                     userId,

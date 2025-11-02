@@ -20,7 +20,7 @@ public class DashboardController {
     public ResponseEntity<?> getDashboard() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             Map<String, Object> dashboardData = dashboardService.getDashboardData(userId);
 

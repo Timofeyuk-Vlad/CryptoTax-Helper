@@ -25,7 +25,7 @@ public class ReportController {
     @PostMapping("/tax")
     public ResponseEntity<?> generateTaxReport(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             Map<String, Object> report = reportService.generateTaxReport(userId, year);
 
@@ -41,7 +41,7 @@ public class ReportController {
     @PostMapping("/tax/pdf")
     public ResponseEntity<byte[]> generateTaxReportPdf(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             byte[] pdfBytes = pdfReportService.generateTaxReportPdf(userId, year);
 
@@ -64,7 +64,7 @@ public class ReportController {
     @PostMapping("/tax/excel")
     public ResponseEntity<byte[]> generateTaxReportExcel(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             byte[] excelBytes = excelReportService.generateTaxReportExcel(userId, year);
 

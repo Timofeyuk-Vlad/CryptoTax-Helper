@@ -131,7 +131,7 @@ public class AuthController {
     public ResponseEntity<?> setup2FA() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             Map<String, String> result = twoFactorAuthService.setup2FA(userId);
 
@@ -148,7 +148,7 @@ public class AuthController {
     public ResponseEntity<?> verify2FA(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             boolean isValid = twoFactorAuthService.verify2FA(userId, authDto.getVerificationCode());
 
@@ -174,7 +174,7 @@ public class AuthController {
     public ResponseEntity<?> disable2FA() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             twoFactorAuthService.disable2FA(userId);
 
@@ -193,7 +193,7 @@ public class AuthController {
     public ResponseEntity<?> get2FAStatus() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId =7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             boolean isEnabled = twoFactorAuthService.is2faEnabled(userId); // ✅ Правильное название с маленькой буквы
 
@@ -230,7 +230,7 @@ public class AuthController {
     public ResponseEntity<?> getCurrentUser() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -256,7 +256,7 @@ public class AuthController {
     @PostMapping("/2fa/verify-test")
     public ResponseEntity<?> verify2FATest(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
-            Long userId = 7L;
+            Long userId = 1L;
 
             boolean isValid = twoFactorAuthService.verify2FATest(userId, authDto.getVerificationCode());
 
@@ -276,7 +276,7 @@ public class AuthController {
     @PostMapping("/2fa/debug-validate")
     public ResponseEntity<?> debugValidate2FA(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
-            Long userId = 7L;
+            Long userId = 1L;
 
             boolean isValid = twoFactorAuthService.validateCode(userId, authDto.getVerificationCode());
 

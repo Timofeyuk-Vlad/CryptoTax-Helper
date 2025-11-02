@@ -24,7 +24,7 @@ public class ExchangeConnectionController {
     public ResponseEntity<?> createConnection(@Valid @RequestBody ExchangeConnectionDto connectionDto) {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             ExchangeConnection connection = exchangeConnectionService.createConnection(userId, connectionDto);
 
@@ -46,7 +46,7 @@ public class ExchangeConnectionController {
     public ResponseEntity<?> getUserConnections() {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             List<ExchangeConnection> connections = exchangeConnectionService.getUserConnections(userId);
 
@@ -63,7 +63,7 @@ public class ExchangeConnectionController {
     public ResponseEntity<?> deleteConnection(@PathVariable Long connectionId) {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             exchangeConnectionService.deleteConnection(userId, connectionId);
 

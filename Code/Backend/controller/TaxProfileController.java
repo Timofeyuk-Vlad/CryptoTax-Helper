@@ -23,7 +23,7 @@ public class TaxProfileController {
     public ResponseEntity<?> createOrUpdateProfile(@Valid @RequestBody TaxProfileDto profileDto) {
         try {
             // TODO: Добавить аутентификацию и получение userId из токена
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             TaxProfile profile = taxProfileService.createOrUpdateProfile(userId, profileDto);
 
@@ -45,7 +45,7 @@ public class TaxProfileController {
     public ResponseEntity<?> getProfile() {
         try {
             // TODO: Добавить аутентификацию
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             TaxProfile profile = taxProfileService.getProfileByUserId(userId);
 

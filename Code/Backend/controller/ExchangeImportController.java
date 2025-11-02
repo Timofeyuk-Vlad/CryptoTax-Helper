@@ -22,7 +22,7 @@ public class ExchangeImportController {
     public ResponseEntity<?> importFromExchange(@PathVariable Long connectionId) {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 7L; // Временная заглушка
+            Long userId = 1L; // Временная заглушка
 
             // Создаем временного пользователя
             com.cryptotax.helper.entity.User user = new com.cryptotax.helper.entity.User();
