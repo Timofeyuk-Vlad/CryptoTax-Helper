@@ -3,6 +3,7 @@ package com.cryptotax.helper.controller;
 import com.cryptotax.helper.dto.ExchangeConnectionDto;
 import com.cryptotax.helper.entity.ExchangeConnection;
 import com.cryptotax.helper.service.ExchangeConnectionService;
+import com.cryptotax.helper.util.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +20,13 @@ import java.util.Map;
 public class ExchangeConnectionController {
 
     private final ExchangeConnectionService exchangeConnectionService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping("/connect")
     public ResponseEntity<?> createConnection(@Valid @RequestBody ExchangeConnectionDto connectionDto) {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             ExchangeConnection connection = exchangeConnectionService.createConnection(userId, connectionDto);
 
@@ -46,7 +48,7 @@ public class ExchangeConnectionController {
     public ResponseEntity<?> getUserConnections() {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             List<ExchangeConnection> connections = exchangeConnectionService.getUserConnections(userId);
 
@@ -63,7 +65,7 @@ public class ExchangeConnectionController {
     public ResponseEntity<?> deleteConnection(@PathVariable Long connectionId) {
         try {
             // TODO: Получить userId из JWT токена
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             exchangeConnectionService.deleteConnection(userId, connectionId);
 

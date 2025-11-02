@@ -3,6 +3,7 @@ package com.cryptotax.helper.controller;
 import com.cryptotax.helper.dto.TaxProfileDto;
 import com.cryptotax.helper.entity.TaxProfile;
 import com.cryptotax.helper.service.TaxProfileService;
+import com.cryptotax.helper.util.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +19,13 @@ import java.util.Map;
 public class TaxProfileController {
 
     private final TaxProfileService taxProfileService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping
     public ResponseEntity<?> createOrUpdateProfile(@Valid @RequestBody TaxProfileDto profileDto) {
         try {
             // TODO: Добавить аутентификацию и получение userId из токена
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             TaxProfile profile = taxProfileService.createOrUpdateProfile(userId, profileDto);
 
@@ -45,7 +47,7 @@ public class TaxProfileController {
     public ResponseEntity<?> getProfile() {
         try {
             // TODO: Добавить аутентификацию
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             TaxProfile profile = taxProfileService.getProfileByUserId(userId);
 

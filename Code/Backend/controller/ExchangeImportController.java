@@ -2,6 +2,7 @@ package com.cryptotax.helper.controller;
 
 import com.cryptotax.helper.entity.Transaction;
 import com.cryptotax.helper.service.ExchangeIntegrationService;
+import com.cryptotax.helper.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,18 +12,19 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/import")
+@RequestMapping("/api/exchange")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ExchangeImportController {
 
     private final ExchangeIntegrationService exchangeIntegrationService;
+    private final SecurityUtils securityUtils;
 
-    @PostMapping("/exchange/{connectionId}")
+    @PostMapping("/import/{connectionId}")
     public ResponseEntity<?> importFromExchange(@PathVariable Long connectionId) {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             // Создаем временного пользователя
             com.cryptotax.helper.entity.User user = new com.cryptotax.helper.entity.User();

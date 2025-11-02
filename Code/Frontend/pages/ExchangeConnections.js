@@ -8,8 +8,14 @@ export default function ExchangeConnections() {
     const [form, setForm] = useState({ exchange: "BINANCE", apiKey: "", apiSecret: "" });
     const [msg, setMsg] = useState("");
 
-    const load = () => ExchangeAPI.list().then(res => setList(res.data)).catch(() => setList([]));
-    useEffect(() => { load(); }, []);
+    const load = () =>
+        ExchangeAPI.list()
+            .then((res) => setList(res.data))
+            .catch(() => setList([]));
+
+    useEffect(() => {
+        load();
+    }, []);
 
     const connect = async () => {
         setMsg("");
@@ -23,11 +29,11 @@ export default function ExchangeConnections() {
         }
     };
 
-    const importBinance = async () => {
+    const importFromExchange = async (connectionId) => {
         setMsg("");
         try {
-            await ExchangeAPI.importBinance();
-            setMsg("Импорт запущен");
+            await ExchangeAPI.importBinance(connectionId);
+            setMsg(`Импорт с подключения #${connectionId} запущен`);
         } catch {
             setMsg("Ошибка импорта");
         }
@@ -38,23 +44,56 @@ export default function ExchangeConnections() {
             <Navbar />
             <Container sx={{ mt: 3 }}>
                 <Paper sx={{ p: 3, mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>Подключённые биржи</Typography>
+                    <Typography variant="h6" gutterBottom>
+                        Подключённые биржи
+                    </Typography>
                     <Box sx={{ mb: 1 }}>
-                        {list?.length ? list.map((c, i) => (
-                            <Typography key={i}>• {c.exchange} — {c.status || "OK"}</Typography>
-                        )) : <Typography color="text.secondary">Нет подключений</Typography>}
+                        {list?.length ? (
+                            list.map((c) => (
+                                <Box key={c.id} sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                    <Typography>
+                                        • {c.exchange} — {c.status || "OK"}
+                                    </Typography>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        onClick={() => importFromExchange(c.id)} // 👈 вот тут передаётся ID
+                                    >
+                                        Импортировать
+                                    </Button>
+                                </Box>
+                            ))
+                        ) : (
+                            <Typography color="text.secondary">Нет подключений</Typography>
+                        )}
                     </Box>
-                    <Button variant="outlined" onClick={importBinance}>Импортировать сделки (Binance демо)</Button>
+
                     {msg && <Typography sx={{ mt: 1 }}>{msg}</Typography>}
                 </Paper>
 
                 <Paper sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>Добавить подключение</Typography>
+                    <Typography variant="h6" gutterBottom>
+                        Добавить подключение
+                    </Typography>
                     <Box sx={{ display: "grid", gap: 2, maxWidth: 520 }}>
-                        <TextField label="Биржа" value={form.exchange} onChange={(e) => setForm({ ...form, exchange: e.target.value })} />
-                        <TextField label="API Key" value={form.apiKey} onChange={(e) => setForm({ ...form, apiKey: e.target.value })} />
-                        <TextField label="API Secret" value={form.apiSecret} onChange={(e) => setForm({ ...form, apiSecret: e.target.value })} />
-                        <Button variant="contained" onClick={connect}>Подключить</Button>
+                        <TextField
+                            label="Биржа"
+                            value={form.exchange}
+                            onChange={(e) => setForm({ ...form, exchange: e.target.value })}
+                        />
+                        <TextField
+                            label="API Key"
+                            value={form.apiKey}
+                            onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
+                        />
+                        <TextField
+                            label="API Secret"
+                            value={form.apiSecret}
+                            onChange={(e) => setForm({ ...form, apiSecret: e.target.value })}
+                        />
+                        <Button variant="contained" onClick={connect}>
+                            Подключить
+                        </Button>
                     </Box>
                 </Paper>
             </Container>

@@ -3,6 +3,7 @@ package com.cryptotax.helper.controller;
 import com.cryptotax.helper.service.ExcelReportService;
 import com.cryptotax.helper.service.PdfReportService;
 import com.cryptotax.helper.service.ReportService;
+import com.cryptotax.helper.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,11 +22,12 @@ public class ReportController {
     private final ReportService reportService;
     private final PdfReportService pdfReportService;
     private final ExcelReportService excelReportService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping("/tax")
     public ResponseEntity<?> generateTaxReport(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             Map<String, Object> report = reportService.generateTaxReport(userId, year);
 
@@ -41,7 +43,7 @@ public class ReportController {
     @PostMapping("/tax/pdf")
     public ResponseEntity<byte[]> generateTaxReportPdf(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             byte[] pdfBytes = pdfReportService.generateTaxReportPdf(userId, year);
 
@@ -64,7 +66,7 @@ public class ReportController {
     @PostMapping("/tax/excel")
     public ResponseEntity<byte[]> generateTaxReportExcel(@RequestParam(defaultValue = "2024") int year) {
         try {
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             byte[] excelBytes = excelReportService.generateTaxReportExcel(userId, year);
 

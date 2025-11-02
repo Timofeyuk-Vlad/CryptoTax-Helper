@@ -1,5 +1,6 @@
 package com.cryptotax.helper.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "transactions")
 public class Transaction {
 
@@ -23,6 +25,7 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exchange_connection_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private ExchangeConnection exchangeConnection;
 
     @Enumerated(EnumType.STRING)

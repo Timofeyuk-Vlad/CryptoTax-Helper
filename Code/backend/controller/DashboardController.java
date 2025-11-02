@@ -1,6 +1,7 @@
 package com.cryptotax.helper.controller;
 
 import com.cryptotax.helper.service.DashboardService;
+import com.cryptotax.helper.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,12 +16,13 @@ import java.util.Map;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final SecurityUtils securityUtils;
 
     @GetMapping
     public ResponseEntity<?> getDashboard() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId(); // Временная заглушка
 
             Map<String, Object> dashboardData = dashboardService.getDashboardData(userId);
 

@@ -8,7 +8,7 @@ const api = axios.create({
 
 // Подставляем JWT из localStorage
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem("jwt");
+    const token = localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
 });
@@ -30,7 +30,7 @@ export const ProfileAPI = {
 export const ExchangeAPI = {
     list: () => api.get("/exchange/connections"),
     connect: (payload) => api.post("/exchange/connect", payload),
-    importBinance: () => api.post("/exchange/import/binance")
+    importBinance: (connectionId) => api.post(`/exchange/import/${connectionId}`)
 };
 
 export const TransactionsAPI = {
@@ -43,5 +43,10 @@ export const ReportsAPI = {
 };
 
 export const TaxAPI = {
-    calculate: (payload) => api.post("/tax/calculate", payload)
+    calculate: (payload) => {
+        const year = new Date().getFullYear();
+        const { from, to } = payload;
+        const params = new URLSearchParams({ year, from, to });
+        return api.post(`/transactions/tax/fifo-detailed?${params.toString()}`, payload);
+    }
 };

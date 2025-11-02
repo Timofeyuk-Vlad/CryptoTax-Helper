@@ -6,12 +6,18 @@ import com.cryptotax.helper.entity.Transaction;
 import com.cryptotax.helper.entity.User;
 import com.cryptotax.helper.repository.TaxProfileRepository;
 import com.cryptotax.helper.repository.TransactionRepository;
+import com.cryptotax.helper.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -24,69 +30,79 @@ public class TaxCalculationService {
     private final TaxProfileRepository taxProfileRepository;
     private final NotificationService notificationService;
     private final FifoTaxCalculationService fifoService;
+    private final SecurityUtils securityUtils;
 
     public TaxCalculationResultDto calculateTaxes(Long userId, int taxYear) {
         User user = new User();
         user.setId(userId);
 
-        log.info("Расчет налогов для пользователя {} за {} год", userId, taxYear);
+        log.info("📊 Расчет налогов для пользователя {} за {} год", userId, taxYear);
 
-        // Получаем налоговый профиль для определения страны
+        // Страна
         String country = getTaxCountry(userId);
 
-        // Получаем транзакции за год
+        // Получаем транзакции
         List<Transaction> transactions = transactionRepository.findByUserAndYearOrderByTimestampDesc(user, taxYear);
 
-        // Используем FIFO расчет
-        Map<String, Object> fifoResult = fifoService.calculateFifoTaxes(transactions, country, taxYear);
-
-        // Конвертируем в DTO
-        TaxCalculationResultDto result = convertToTaxResultDto(fifoResult, taxYear);
-        result.setTransactionCount(transactions.size());
-
-        // Уведомление
-        try {
-            notificationService.notifyTaxCalculationReady(userId, taxYear, result.getTaxAmount().toString());
-        } catch (Exception e) {
-            log.warn("Не удалось отправить уведомление: {}", e.getMessage());
+        // Если транзакций нет — не упадём
+        if (transactions.isEmpty()) {
+            log.warn("⚠️ У пользователя {} нет транзакций за {} год", userId, taxYear);
         }
 
-        log.info("Расчет налогов завершен: страна={}, налог={}", country, result.getTaxAmount());
+        // FIFO расчет (без фильтра валюты)
+        Map<String, Object> fifoResult = fifoService.calculateFifoTaxes(transactions, country, taxYear, null);
+
+// Проверяем успешность
+        if (!(Boolean) fifoResult.getOrDefault("success", true)) {
+            log.warn("⚠️ Расчет FIFO не выполнен: {}", fifoResult.get("message"));
+            throw new IllegalStateException("Расчет FIFO не выполнен: " + fifoResult.get("message"));
+        }
+
+// Извлекаем подрезультат
+        Object calcObj = fifoResult.get("fifoCalculation");
+        if (!(calcObj instanceof Map)) {
+            log.error("❌ Неверный формат результата FIFO: {}", fifoResult);
+            throw new IllegalStateException("Ошибка расчета налогов: неверный формат данных");
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> calculation = (Map<String, Object>) calcObj;
+
+        TaxCalculationResultDto result = new TaxCalculationResultDto();
+
+        result.setTaxYear(taxYear);
+        result.setTotalIncome((BigDecimal) calculation.getOrDefault("totalIncome", BigDecimal.ZERO));
+        result.setTotalExpenses((BigDecimal) calculation.getOrDefault("totalExpenses", BigDecimal.ZERO));
+        result.setTaxableProfit((BigDecimal) calculation.getOrDefault("taxableProfit", BigDecimal.ZERO));
+        result.setTaxAmount((BigDecimal) calculation.getOrDefault("taxAmount", BigDecimal.ZERO));
+        result.setTransactionCount(transactions.size());
+        result.setCurrency("RUSSIA".equalsIgnoreCase(country) ? "RUB" : "BYN");
+        result.setCountry(country);
+        result.setCalculationMethod("FIFO");
+
+        // Отправляем уведомление (не критично, если не получится)
+        try {
+            notificationService.notifyTaxCalculationReady(userId, taxYear, result.getTaxAmount().toPlainString());
+        } catch (Exception e) {
+            log.warn("⚠️ Не удалось отправить уведомление: {}", e.getMessage());
+        }
+
+        log.info("✅ Расчет налогов завершен: страна={}, налог={}", country, result.getTaxAmount());
         return result;
     }
 
-    /**
-     * Получение страны из налогового профиля
-     */
     private String getTaxCountry(Long userId) {
         try {
-            TaxProfile profile = taxProfileRepository.findByUserId(userId)
-                    .orElse(null);
-            return profile != null && profile.getCountry() != null ?
-                    profile.getCountry().name() : "RUSSIA";
+            TaxProfile profile = taxProfileRepository.findByUserId(userId).orElse(null);
+            return (profile != null && profile.getCountry() != null)
+                    ? profile.getCountry().name()
+                    : "RUSSIA";
         } catch (Exception e) {
-            log.warn("Не удалось получить налоговый профиль, используем Россию по умолчанию");
+            log.warn("⚠️ Не удалось получить налоговый профиль, используем Россию по умолчанию");
             return "RUSSIA";
         }
     }
 
-    /**
-     * Конвертация FIFO результата в DTO
-     */
-    private TaxCalculationResultDto convertToTaxResultDto(Map<String, Object> fifoResult, int taxYear) {
-        TaxCalculationResultDto result = new TaxCalculationResultDto();
-        result.setTaxYear(taxYear);
 
-        Map<String, Object> calculation = (Map<String, Object>) fifoResult.get("fifoCalculation");
 
-        result.setTotalIncome((BigDecimal) calculation.get("totalIncome"));
-        result.setTotalExpenses((BigDecimal) calculation.get("totalExpenses"));
-        result.setTaxableProfit((BigDecimal) calculation.get("taxableProfit"));
-        result.setTaxAmount((BigDecimal) calculation.get("taxAmount"));
-
-        // Добавляем информацию о стране и методе
-        result.setCurrency(fifoResult.get("country").equals("BELARUS") ? "BYN" : "RUB");
-
-        return result;
-    }
 }

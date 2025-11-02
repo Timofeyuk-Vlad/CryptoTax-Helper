@@ -9,45 +9,87 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class FifoTaxCalculationService {
 
     /**
-     * Упрощенный FIFO расчет для демонстрации
+     * Основной FIFO-расчёт с фильтром по валюте и очисткой нулевых данных
      */
-    public Map<String, Object> calculateFifoTaxes(List<Transaction> transactions, String country, int taxYear) {
-        log.info("Демо-режим: FIFO расчет для {}, год {}", country, taxYear);
+    public Map<String, Object> calculateFifoTaxes(
+            List<Transaction> transactions,
+            String country,
+            int taxYear,
+            String filterAsset
+    ) {
+        log.info("🚀 Запуск FIFO расчёта для страны={}, год={}, фильтр={}",
+                country, taxYear, (filterAsset != null ? filterAsset : "—нет—"));
 
         Map<String, Object> result = new HashMap<>();
 
-        if (transactions.isEmpty()) {
-            // Если нет транзакций, создаем реалистичные демо-данные
-            transactions = generateDemoTransactions();
+        if (transactions == null || transactions.isEmpty()) {
+            log.warn("⚠️ Пустой список транзакций, возвращаем заглушку");
+            result.put("success", false);
+            result.put("message", "Нет транзакций для расчёта");
+            return result;
         }
 
-        // Сортируем транзакции по времени (FIFO требует хронологический порядок)
+        // Очистка нулевых и мусорных записей
+        transactions = transactions.stream()
+                .filter(tx -> tx.getBaseAsset() != null && !tx.getBaseAsset().isBlank())
+                .filter(tx -> tx.getType() != null)
+                .filter(tx -> tx.getAmount() != null && tx.getAmount().compareTo(BigDecimal.ZERO) > 0)
+                .filter(tx -> tx.getPrice() != null && tx.getPrice().compareTo(BigDecimal.ZERO) > 0)
+                .filter(tx -> tx.getTotal() != null && tx.getTotal().compareTo(BigDecimal.ZERO) > 0)
+                .collect(Collectors.toList());
+
+        if (transactions.isEmpty()) {
+            log.warn("⚠️ После фильтрации не осталось корректных транзакций");
+            result.put("success", false);
+            result.put("message", "Нет корректных транзакций для расчёта");
+            return result;
+        }
+
+        // Фильтрация по активу
+        if (filterAsset != null && !filterAsset.isBlank()) {
+            String assetUpper = filterAsset.trim().toUpperCase();
+            transactions = transactions.stream()
+                    .filter(tx -> tx.getBaseAsset() != null && tx.getBaseAsset().equalsIgnoreCase(assetUpper))
+                    .collect(Collectors.toList());
+            log.info("🔎 Применён фильтр по активу: {} (осталось {} транзакций)", assetUpper, transactions.size());
+        } else {
+            log.info("⚙️ Фильтр валюты не задан — расчёт по всем активам");
+        }
+
+        if (transactions.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Нет транзакций для указанного актива");
+            return result;
+        }
+
+        // Сортируем по времени
         transactions.sort(Comparator.comparing(Transaction::getTimestamp));
 
-        // Применяем "упрощенный FIFO"
-        Map<String, Object> fifoResult = applySimplifiedFifo(transactions, country);
+        // Выполняем FIFO
+        Map<String, Object> fifoCalc = applySimplifiedFifo(transactions, country);
 
         result.put("success", true);
         result.put("taxYear", taxYear);
         result.put("country", country);
-        result.put("calculationMethod", "FIFO");
+        result.put("filterAsset", filterAsset);
+        result.put("fifoCalculation", fifoCalc);
         result.put("transactionCount", transactions.size());
-        result.put("fifoCalculation", fifoResult);
-        result.put("demoMode", true);
         result.put("calculationTime", LocalDateTime.now());
 
-        log.info("Демо FIFO расчет завершен: {}", result);
+        log.info("✅ FIFO расчёт завершён успешно: актив={} транзакций={}",
+                (filterAsset != null ? filterAsset : "ALL"), transactions.size());
         return result;
     }
 
     /**
-     * Упрощенный FIFO для демонстрации
+     * Упрощённый FIFO-алгоритм
      */
     private Map<String, Object> applySimplifiedFifo(List<Transaction> transactions, String country) {
         Map<String, Object> result = new HashMap<>();
@@ -55,105 +97,85 @@ public class FifoTaxCalculationService {
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpenses = BigDecimal.ZERO;
         BigDecimal totalFees = BigDecimal.ZERO;
-        Map<String, List<Map<String, Object>>> assetCalculations = new HashMap<>();
+        Map<String, List<Map<String, Object>>> assetDetails = new HashMap<>();
 
-        // Группируем по активам для "FIFO-like" расчета
-        Map<String, List<Transaction>> transactionsByAsset = new HashMap<>();
+        // Группировка по активам
+        Map<String, List<Transaction>> byAsset = new HashMap<>();
         for (Transaction tx : transactions) {
-            transactionsByAsset
-                    .computeIfAbsent(tx.getBaseAsset(), k -> new ArrayList<>())
-                    .add(tx);
+            byAsset.computeIfAbsent(tx.getBaseAsset(), k -> new ArrayList<>()).add(tx);
         }
 
-        // "FIFO расчет" по каждому активу
-        for (Map.Entry<String, List<Transaction>> entry : transactionsByAsset.entrySet()) {
+        for (Map.Entry<String, List<Transaction>> entry : byAsset.entrySet()) {
             String asset = entry.getKey();
-            List<Transaction> assetTransactions = entry.getValue();
+            List<Transaction> assetTxs = entry.getValue();
 
-            List<Map<String, Object>> fifoOperations = new ArrayList<>();
-            BigDecimal assetProfit = BigDecimal.ZERO;
-            BigDecimal assetCost = BigDecimal.ZERO;
-
-            // Упрощенный FIFO: покупки -> продажи
-            List<Transaction> purchases = assetTransactions.stream()
+            List<Transaction> buys = assetTxs.stream()
                     .filter(tx -> tx.getType() == TransactionType.BUY)
                     .sorted(Comparator.comparing(Transaction::getTimestamp))
-                    .toList();
+                    .collect(Collectors.toList());
 
-            List<Transaction> sales = assetTransactions.stream()
+            List<Transaction> sells = assetTxs.stream()
                     .filter(tx -> tx.getType() == TransactionType.SELL)
                     .sorted(Comparator.comparing(Transaction::getTimestamp))
-                    .toList();
+                    .collect(Collectors.toList());
 
-            // Демо-расчет прибыли
-            for (Transaction sale : sales) {
-                if (!purchases.isEmpty()) {
-                    // Берем первую покупку (FIFO)
-                    Transaction firstPurchase = purchases.get(0);
+            List<Map<String, Object>> operations = new ArrayList<>();
 
-                    BigDecimal saleRevenue = sale.getTotal() != null ? sale.getTotal() : BigDecimal.ZERO;
-                    BigDecimal purchaseCost = firstPurchase.getTotal() != null ? firstPurchase.getTotal() : BigDecimal.ZERO;
-                    BigDecimal profit = saleRevenue.subtract(purchaseCost).max(BigDecimal.ZERO);
+            for (Transaction sell : sells) {
+                if (buys.isEmpty()) continue;
 
-                    assetProfit = assetProfit.add(profit);
-                    assetCost = assetCost.add(purchaseCost);
-                    totalIncome = totalIncome.add(saleRevenue);
+                Transaction buy = buys.get(0);
+                BigDecimal saleRevenue = sell.getTotal();
+                BigDecimal buyCost = buy.getTotal();
 
-                    fifoOperations.add(Map.of(
-                            "saleDate", sale.getTimestamp(),
-                            "saleAmount", sale.getAmount(),
-                            "salePrice", sale.getPrice(),
-                            "purchaseDate", firstPurchase.getTimestamp(),
-                            "purchasePrice", firstPurchase.getPrice(),
-                            "profit", profit
-                    ));
+                BigDecimal proportion = BigDecimal.ZERO;
+                if (buy.getAmount() != null && buy.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    proportion = sell.getAmount().divide(buy.getAmount(), 8, RoundingMode.HALF_UP);
                 }
+
+                BigDecimal proportionalCost = buyCost.multiply(proportion);
+                BigDecimal profit = saleRevenue.subtract(proportionalCost);
+                if (profit.compareTo(BigDecimal.ZERO) < 0) profit = BigDecimal.ZERO;
+
+                totalIncome = totalIncome.add(saleRevenue);
+                totalExpenses = totalExpenses.add(proportionalCost);
+                totalFees = totalFees.add(
+                        sell.getFee() != null ? sell.getFee() : BigDecimal.ZERO
+                );
+
+                operations.add(Map.of(
+                        "saleDate", sell.getTimestamp(),
+                        "purchaseDate", buy.getTimestamp(),
+                        "saleAmount", sell.getAmount(),
+                        "salePrice", sell.getPrice(),
+                        "purchasePrice", buy.getPrice(),
+                        "profit", profit
+                ));
             }
 
-            // Учитываем расходы на покупки
-            for (Transaction purchase : purchases) {
-                if (purchase.getTotal() != null) {
-                    totalExpenses = totalExpenses.add(purchase.getTotal());
-                }
-            }
-
-            // Учитываем комиссии
-            for (Transaction tx : assetTransactions) {
-                if (tx.getFee() != null) {
-                    totalFees = totalFees.add(tx.getFee());
-                    totalExpenses = totalExpenses.add(tx.getFee());
-                }
-            }
-
-            assetCalculations.put(asset, fifoOperations);
+            assetDetails.put(asset, operations);
         }
 
-        BigDecimal taxableProfit = totalIncome.subtract(totalExpenses).max(BigDecimal.ZERO);
-        BigDecimal taxAmount = calculateTaxByCountry(taxableProfit, country);
+        BigDecimal taxableProfit = totalIncome.subtract(totalExpenses).subtract(totalFees).max(BigDecimal.ZERO);
+        BigDecimal tax = calculateTaxByCountry(taxableProfit, country);
 
         result.put("totalIncome", totalIncome.setScale(2, RoundingMode.HALF_UP));
         result.put("totalExpenses", totalExpenses.setScale(2, RoundingMode.HALF_UP));
         result.put("totalFees", totalFees.setScale(2, RoundingMode.HALF_UP));
         result.put("taxableProfit", taxableProfit.setScale(2, RoundingMode.HALF_UP));
-        result.put("taxAmount", taxAmount.setScale(2, RoundingMode.HALF_UP));
-        result.put("assetCalculations", assetCalculations);
+        result.put("taxAmount", tax.setScale(2, RoundingMode.HALF_UP));
+        result.put("assetDetails", assetDetails);
         result.put("currency", "RUB");
 
         return result;
     }
 
-    /**
-     * Расчет налога по стране
-     */
     private BigDecimal calculateTaxByCountry(BigDecimal profit, String country) {
-        if (profit.compareTo(BigDecimal.ZERO) <= 0) {
-            return BigDecimal.ZERO;
-        }
+        if (profit.compareTo(BigDecimal.ZERO) <= 0) return BigDecimal.ZERO;
 
         switch (country.toUpperCase()) {
             case "RUSSIA":
             case "RU":
-                // РФ: 13% до 2.4 млн, 15% свыше
                 BigDecimal threshold = new BigDecimal("2400000");
                 if (profit.compareTo(threshold) <= 0) {
                     return profit.multiply(new BigDecimal("0.13"));
@@ -165,51 +187,12 @@ public class FifoTaxCalculationService {
 
             case "BELARUS":
             case "BY":
-                // РБ: 13% с учетом необлагаемого минимума 10,000 BYN
-                BigDecimal taxFreeAllowance = new BigDecimal("10000");
-                BigDecimal taxableAmount = profit.subtract(taxFreeAllowance).max(BigDecimal.ZERO);
-                return taxableAmount.multiply(new BigDecimal("0.13"));
+                BigDecimal taxFree = new BigDecimal("10000");
+                BigDecimal taxable = profit.subtract(taxFree).max(BigDecimal.ZERO);
+                return taxable.multiply(new BigDecimal("0.13"));
 
             default:
                 return profit.multiply(new BigDecimal("0.13"));
         }
-    }
-
-    /**
-     * Генерация демо-транзакций если нет реальных
-     */
-    private List<Transaction> generateDemoTransactions() {
-        List<Transaction> demoTransactions = new ArrayList<>();
-        LocalDateTime now = LocalDateTime.now();
-
-        // Демо-покупки
-        demoTransactions.add(createDemoTransaction("BTC", new BigDecimal("0.5"), TransactionType.BUY,
-                new BigDecimal("40000"), now.minusMonths(6)));
-        demoTransactions.add(createDemoTransaction("ETH", new BigDecimal("3.0"), TransactionType.BUY,
-                new BigDecimal("2500"), now.minusMonths(4)));
-        demoTransactions.add(createDemoTransaction("BTC", new BigDecimal("0.2"), TransactionType.BUY,
-                new BigDecimal("45000"), now.minusMonths(2)));
-
-        // Демо-продажи (для FIFO)
-        demoTransactions.add(createDemoTransaction("BTC", new BigDecimal("0.3"), TransactionType.SELL,
-                new BigDecimal("52000"), now.minusMonths(1)));
-        demoTransactions.add(createDemoTransaction("ETH", new BigDecimal("1.5"), TransactionType.SELL,
-                new BigDecimal("3200"), now.minusWeeks(2)));
-
-        return demoTransactions;
-    }
-
-    private Transaction createDemoTransaction(String asset, BigDecimal amount, TransactionType type,
-                                              BigDecimal price, LocalDateTime timestamp) {
-        Transaction tx = new Transaction();
-        tx.setBaseAsset(asset);
-        tx.setAmount(amount);
-        tx.setType(type);
-        tx.setPrice(price);
-        tx.setTotal(price.multiply(amount));
-        tx.setTimestamp(timestamp);
-        tx.setFee(price.multiply(amount).multiply(new BigDecimal("0.001"))); // 0.1% комиссия
-        tx.setFeeAsset("BNB");
-        return tx;
     }
 }

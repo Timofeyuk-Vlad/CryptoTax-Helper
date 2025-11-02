@@ -6,6 +6,7 @@ import com.cryptotax.helper.repository.UserRepository;
 import com.cryptotax.helper.security.JwtUtil;
 import com.cryptotax.helper.service.TwoFactorAuthService;
 import com.cryptotax.helper.service.UserService;
+import com.cryptotax.helper.util.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +33,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final TwoFactorAuthService twoFactorAuthService;
+    private final SecurityUtils securityUtils;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserRegistrationDto registrationDto) {
@@ -131,7 +133,7 @@ public class AuthController {
     public ResponseEntity<?> setup2FA() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
 
             Map<String, String> result = twoFactorAuthService.setup2FA(userId);
 
@@ -148,7 +150,7 @@ public class AuthController {
     public ResponseEntity<?> verify2FA(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
 
             boolean isValid = twoFactorAuthService.verify2FA(userId, authDto.getVerificationCode());
 
@@ -174,7 +176,7 @@ public class AuthController {
     public ResponseEntity<?> disable2FA() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
 
             twoFactorAuthService.disable2FA(userId);
 
@@ -193,7 +195,7 @@ public class AuthController {
     public ResponseEntity<?> get2FAStatus() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
 
             boolean isEnabled = twoFactorAuthService.is2faEnabled(userId); // ✅ Правильное название с маленькой буквы
 
@@ -230,7 +232,7 @@ public class AuthController {
     public ResponseEntity<?> getCurrentUser() {
         try {
             // TODO: Получить userId из SecurityContext
-            Long userId = 1L; // Временная заглушка
+            Long userId = securityUtils.getCurrentUserId();
 
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
@@ -256,7 +258,7 @@ public class AuthController {
     @PostMapping("/2fa/verify-test")
     public ResponseEntity<?> verify2FATest(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
-            Long userId = 1L;
+            Long userId = securityUtils.getCurrentUserId();
 
             boolean isValid = twoFactorAuthService.verify2FATest(userId, authDto.getVerificationCode());
 
@@ -276,7 +278,7 @@ public class AuthController {
     @PostMapping("/2fa/debug-validate")
     public ResponseEntity<?> debugValidate2FA(@Valid @RequestBody TwoFactorAuthDto authDto) {
         try {
-            Long userId = 1L;
+            Long userId = securityUtils.getCurrentUserId();
 
             boolean isValid = twoFactorAuthService.validateCode(userId, authDto.getVerificationCode());
 
