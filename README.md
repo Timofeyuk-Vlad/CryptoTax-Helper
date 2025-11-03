@@ -40,7 +40,7 @@
 
 - **Frontend:** React + JavaScript  
 - **Backend:** Java (Spring Boot, Spring Web, Spring Data JPA)  
-- **База данных:** PostgreSQL  
+- **База данных:** MySQL  
 - **Отчеты:** PDF (через iText или JasperReports)  
 - **Развертывание:** Docker
 
